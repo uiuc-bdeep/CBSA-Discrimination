@@ -99,8 +99,8 @@ def main(input_file, dest, start, crawler_log, geckodriver_path, adblock_path, u
 	    sleep(3)
             if "this page" in driver.title.lower():
 	    	print ("Being blocked from accessing Trulia. Restarting...")
+                driver.quit()
                 sleep(random.randint(10,40))
-	       	driver.quit()
     		restart(crawler_log, start)
             else:
                 print("{}: Zipcode {}".format(i, zipcode))
