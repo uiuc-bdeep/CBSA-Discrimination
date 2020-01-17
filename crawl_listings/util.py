@@ -45,7 +45,7 @@ def restart(crawler_log, start):
 
 	print("argv was",sys.argv)
 	print("sys.executable was", sys.executable)
-	print("restart now")
+	print("Restarting")
 
 	sleep(5)
 
@@ -61,7 +61,6 @@ def restart(crawler_log, start):
 	else:
 		lines = [str(start)]
 
-	print (sys.argv)
 	arg = []
 
 	find_start = False
@@ -103,11 +102,44 @@ def start_firefox(URL, geckodriver_path, adblock_path, uBlock_path):
 
 	driver.install_addon(adblock_path)
 	driver.install_addon(uBlock_path)
-	#driver.install_addon("I:\\adblock_plus-3.0.2-an+fx.xpi")
-	#driver.install_addon("I:\\uBlock0@raymondhill.net.xpi")
 
 	driver.wait = WebDriverWait(driver, 5)
 	driver.delete_all_cookies()
 	driver.get(URL)
 	print(driver.title)
 	return driver
+
+def wait_and_get(browser, cond, maxtime):
+    flag = True
+    while flag:
+        try:
+            ret = WebDriverWait(browser, maxtime).until(cond)
+            sleep(2)
+            ret = WebDriverWait(browser, maxtime).until(cond)
+            flag = False
+            return ret
+
+        except TimeoutException:
+            #print("Time out")
+            flag = False
+            while len(browser.window_handles) > 1:
+                browser.switch_to_window(browser.window_handles[-1])
+                browser.close()
+                browser.switch_to_window(browser.window_handles[0])
+                flag = True
+                if not flag:
+                    try:
+                        browser.find_elements_by_id("searchID").click()
+                        flag = True
+                    except:
+                        #print("Time out without pop-ups. Exit.")
+                        return 0
+
+        except ElementNotVisibleException:
+            print("Element Not Visible, presumptuously experienced pop-ups")
+            while len(browser.window_handles) > 1:
+                browser.switch_to_window(browser.window_handles[-1])
+                browser.close()
+                browser.switch_to_window(browser.window_handles[0])
+                flag = True
+
