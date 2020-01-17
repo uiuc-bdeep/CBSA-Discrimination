@@ -3,10 +3,10 @@ import os
 import csv 
 import sys
 import math
+import random
 import pandas as pd 
 from time import sleep 
 from selenium import webdriver
-from pyvirtualdisplay import Display 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
@@ -21,41 +21,8 @@ from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.common.exceptions import ElementNotInteractableException
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from datetime import date, timedelta, datetime
+from util import start_firefox, restart, wait_and_get
 import pytz
-
-def wait_and_get(browser, cond, maxtime): 
-	flag = True
-
-	while flag:
-		try: 
-			ret = WebDriverWait(browser, maxtime).until(cond)
-			sleep(2)
-			ret = WebDriverWait(browser, maxtime).until(cond)
-			flag = False
-			return ret
-		except TimeoutException:
-			#print("Time out")
-			flag = False
-			while len(browser.window_handles) > 1:
-				browser.switch_to_window(browser.window_handles[-1])
-				browser.close()
-				browser.switch_to_window(browser.window_handles[0])
-				flag = True
-			if not flag:
-				try:
-					browser.find_elements_by_id("searchID").click()
-					flag = True
-				except:
-					#print("Time out without pop-ups. Exit.")
-					return 0
-
-		except ElementNotVisibleException:
-			print("Element Not Visible, presumptuously experienced pop-ups")
-			while len(browser.window_handles) > 1:
-				browser.switch_to_window(browser.window_handles[-1])
-				browser.close()
-				browser.switch_to_window(browser.window_handles[0])
-				flag = True
 
 def get_destination(tz):
     now = datetime.now(tz)
@@ -70,48 +37,42 @@ def get_destination(tz):
     return dest
 
 root = '/home/ubuntu/CBSA-Discrimination/'
-
+geckodriver_path = root + 'stores/geckodriver'
+adblock_path = root + "stores/adblock_plus-3.3.1-an+fx.xpi"
+uBlock_path = root + "stores/uBlock0@raymondhill.net.xpi"
 
 ZIP_URL_PRE = 'https://www.trulia.com/for_rent/'
 ZIP_URL_SUF = '_zip/'#3_beds/2_baths/'
 ZIP_URL_PAGE = '_p'
 
 # read in zip code csv file 
-if len(sys.argv) != 1: 
+if len(sys.argv) != 3: 
 	print('-------------------------------------------------')
 	print('REQUIRED ARGUMENTS:')
-	print('python new_url_crawler.py')
+	print('python new_url_crawler.py logfile start')
 	print('-------------------------------------------------')
 	exit()
 
 tz = pytz.timezone('America/Chicago')
 dest = get_destination(tz)
-zip_csv = root + "rounds/chicago_zipcodes_short.csv"
+zip_csv = root + "rounds/unfinished_selected_zips.csv"
+
+logfile = sys.argv[1]
+start = int(sys.argv[2])
 
 zip_start = 0
 df_zip    = pd.read_csv(zip_csv) 
 zip_list =  list(df_zip['ZIP'].values.flatten())
 cbsa_list = list(df_zip['CBSA'].values.flatten())
 
-options = Options()
-options.add_argument("--headless")
-fp = webdriver.FirefoxProfile()
-#fp.set_preference("general.useragent.override", UserAgent().random)
-fp.update_preferences()
-driver = webdriver.Firefox(firefox_profile = fp, firefox_options = options,
-                                                        capabilities = webdriver.DesiredCapabilities.FIREFOX,
-                                                        executable_path = root + 'stores/geckodriver')
-#driver   = webdriver.Firefox(executable_path='/usr/bin/geckodriver')
-#driver.set_page_load_timeout(30) # set a time out for 30 secons
-driver.maximize_window()
-display  = Display(visible=0, size=(1024, 768)) # start display
-display.start() # start the display
+driver = start_firefox('https://www.trulia.com', geckodriver_path, adblock_path, uBlock_path)
 
 listings_all = []
-with open(dest, "w") as f:
+with open(dest, "a+") as f:
 	writer = csv.writer(f)
-	writer.writerow(["CBSA", "ZIP", "URL"])
-	for i in range(0,len(zip_list)):
+        if start == 0:
+	        writer.writerow(["CBSA", "ZIP", "URL"])
+	for i in range(start, len(zip_list)):
                 zipcode = zip_list[i]
                 cbsa = cbsa_list[i]
                 if int(zipcode) < 10000:
@@ -124,6 +85,11 @@ with open(dest, "w") as f:
 			counter      = 0
                 print(zip_url)
 		driver.get(zip_url)
+                if "this page" in driver.title.lower():
+                    print ("Being blocked from accessing Trulia. Restarting...")
+                    driver.quit()
+                    sleep(random.randint(60,120))
+                    restart(logfile, start)
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 		num_listings = list(set(re.findall(r'\w*[0-9]* rentals? available on Trulia',driver.page_source)))
 		#print('Page Number: ' + str(counter))
@@ -158,9 +124,12 @@ with open(dest, "w") as f:
 			if counter < num_pages:
 				driver.get(zip_url+str(counter) + '_p')
 				sleep(5)
+                with open(logfile, "ab") as log:
+                        filewriter = csv.writer(log, delimiter = ',', quoting = csv.QUOTE_MINIMAL)
+                        filewriter.writerow([i])
+
 
 driver.quit()
-display.stop()
 
 listings_all = list(set(listings_all))
 listings_all  = pd.Series(listings_all)
