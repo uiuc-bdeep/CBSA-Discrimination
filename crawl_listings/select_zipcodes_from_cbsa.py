@@ -11,7 +11,7 @@ if len(sys.argv) != 2:
     exit()
 
 root = '/home/ubuntu/CBSA-Discrimination/'
-cbsa_df = pd.read_csv(root + 'rounds/unfinished_cbsa_counts.csv')
+cbsa_df = pd.read_csv(root + 'rounds/cbsa_zipcode_counts.csv')
 dest = root + 'rounds/' + sys.argv[1]
 sample_size = 0.05
 
@@ -46,9 +46,10 @@ def select_zips_from_cbsa(cbsa, zip_counts):
     selections = []
     too_low = 0
     for zipcode, num_listings in zip_counts:
-        if len(selections) >= (sample_size * length):
+        #if len(selections) >= (sample_size * length):
+        if len(selections) > 20:
             break
-        if num_listings > 20:
+        if num_listings > 30:
             selections.append((zipcode, num_listings))
             print("\tAppended zipcode {} with {} listings".format(zipcode, num_listings))
         else:
