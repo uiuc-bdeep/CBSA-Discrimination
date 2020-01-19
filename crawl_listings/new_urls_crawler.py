@@ -55,7 +55,7 @@ if len(sys.argv) != 3:
 
 tz = pytz.timezone('America/Chicago')
 dest = get_destination(tz)
-zip_csv = root + "rounds/unfinished_selected_zips.csv"
+zip_csv = root + "rounds/selected_zip_20.csv"
 
 logfile = sys.argv[1]
 start = int(sys.argv[2])
@@ -84,7 +84,13 @@ with open(dest, "a+") as f:
 			zip_url = ZIP_URL_PRE + str(zip_list[i]) + ZIP_URL_SUF 
 			counter      = 0
                 print(zip_url)
-		driver.get(zip_url)
+                try:
+                    driver.get(zip_url)
+                except:
+                    print("Unable to get URL. Most likely Timing Out. Restarting...")
+                    driver.quit()
+                    sleep(random.randint(10,40))
+                    restart(logfile, start)
                 if "this page" in driver.title.lower():
                     print ("Being blocked from accessing Trulia. Restarting...")
                     driver.quit()
