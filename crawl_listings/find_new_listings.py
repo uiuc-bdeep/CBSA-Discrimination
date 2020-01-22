@@ -1,5 +1,7 @@
 import sys
 import csv
+import pandas as pd
+from tqdm import tqdm
 
 if len(sys.argv) != 3:
 	print("Must include two url csvs as input")
@@ -11,24 +13,24 @@ destination = "new_urls.csv"
 print("Day 1: " + day1)
 print("Day 2: " + day2)
 
-urls1 = []
-with open(day1, "r") as f1:
-	for line in f1:
-		urls1.append(line)
+df_1 = pd.read_csv(day1)
+urls_1 = df_1['URL'].values.flatten()
+print(urls_1)
 
+df_2 = pd.read_csv(day2)
 result = []
-with open(day2, "r") as f2:
-	for line in f2:
-		if line not in urls1:
-			result.append(str(line.split('\r')[0]))
-
-print(result)
+for idx in tqdm(range(df_2.shape[0]), desc="Finding new listings", bar_format="{l_bar}{bar}|   "):
+	url = df_2.at[idx, 'URL']
+	cbsa = df_2.at[idx, 'CBSA']
+	zipcode = df_2.at[idx, 'ZIP']
+	if url not in urls_1:
+		result.append([cbsa, zipcode, url])
 
 with open(destination, 'w') as f:
 	csv_writer = csv.writer(f, delimiter=',')
-	csv_writer.writerow(["URLs"])
+	csv_writer.writerow(["CBSA", "ZIP", "URL"])
 	for url in result:
-		csv_writer.writerow([str(url)])
+		csv_writer.writerow(url)
 
 print("Total new URLs: {}".format(len(result)))
 print("Results written to " + destination)
