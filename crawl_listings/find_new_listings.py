@@ -9,7 +9,7 @@ if len(sys.argv) != 3:
 
 day1 = sys.argv[1]
 day2 = sys.argv[2]
-destination = "new_urls.csv"
+destination = "../rounds/new_urls_3_0-1.csv"
 print("Day 1: " + day1)
 print("Day 2: " + day2)
 

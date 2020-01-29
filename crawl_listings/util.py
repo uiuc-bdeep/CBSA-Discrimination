@@ -48,12 +48,15 @@ def restart(crawler_log, start):
 	print("Restarting")
 
 	sleep(5)
+	try:
+		for proc in psutil.process_iter():
+			if "firefox" in proc.name():
+				proc.kill()
+			if "geckodriver" in proc.name():
+				proc.kill()
 
-	for proc in psutil.process_iter():
-		if "firefox" in proc.name():
-			proc.kill()
-		if "geckodriver" in proc.name():
-			proc.kill()
+	except:
+		print("Error killing processes. Continuing")
 
 	if os.path.isfile(crawler_log) == True:
 		with open(crawler_log) as f:
@@ -142,4 +145,75 @@ def wait_and_get(browser, cond, maxtime):
                 browser.close()
                 browser.switch_to_window(browser.window_handles[0])
                 flag = True
+
+def get_proxies():
+	url = 'https://free-proxy-list.net/'
+       	response = requests.get(url)
+        parser = fromstring(response.text)
+        #print(parser)
+        proxies = set()
+        for i in parser.xpath('//tbody/tr')[:10]:
+                #print(i)
+                if i.xpath('.//td[7][contains(text(),"yes")]'):
+                        proxy = ":".join([i.xpath('.//td[1]/text()')[0], i.xpath('.//td[2]/text()')[0]])
+                        proxies.add(proxy)
+        if len(proxies) == 0:
+                #sleep(30)
+                proxies = get_proxies()
+	return proxies
+
+
+def download_kml_tor(email, date, cookie_content, session):
+        cookies = dict(cookie=cookie_content)
+        year, month, day = date.split('-')
+        if(int(day) < 10):
+                day = int(day)
+        url = 'https://www.google.com/maps/timeline/kml?authuser=0&pb=!1m8!1m3!1i{0}!2i{1}!3i{2}!2m3!1i{0}!2i{1}!3i{2}'.format(year, int(month) - 1, day)
+#       time.sleep(np.random.randint(0, 3) / 3)
+#       renew_connection()
+#       session = get_tor_session()
+        response = session.get('http://ipecho.net/plain')
+        print ("New IP Address:", response.text)
+        r = session.get(url, cookies=cookies)
+        if r.status_code == 200:
+                filename = 'kml_files/{}/history-{}.kml'.format(email, date)
+                with open(filename, 'w') as f:
+                        #f.write(r.text.encode('utf-8'))
+                        f.write(r.text)
+                print("SUCCESS: wrote to file: " + filename)
+                return 1
+        else:
+                print(r.content)
+                print("ERROR: " + str(r.status_code))
+        return 0
+
+def test():
+	cookie_content = read_cookie("cookie_files/" + filename)
+        print("Reading cookie: ", filename)
+        num_success = 0
+        t0 = time.time()
+        renew_connection()
+        session = get_tor_session()
+        for i in tqdm(range(len(dates)), desc=message, bar_format="{l_bar}{bar}|   "):
+        	date = dates[i]
+       	        print("Downloading Date: ", date)
+                result = download_kml_tor("test" + str(j), str(date), cookie_content, session)
+                num_success += result
+                if (result == 0):
+       	        	print("Encountered Error at: ", time.time())
+                        print("Retrying...")
+                        renew_connection()
+                        session = get_tor_session()
+                        result = download_kml_tor("test" + str(j), str(date), cookie_content, session)
+                       	num_success += result
+        print(num_success, " Downloads of 9000")
+       	t3 = time.time()
+        print("END: ", t3)
+
+def renew_connection():
+        with Controller.from_port(port=9051) as controller:
+                controller.authenticate(password="bdeeptor")
+                controller.signal(Signal.NEWNYM)
+                time.sleep(controller.get_newnym_wait())
+
 

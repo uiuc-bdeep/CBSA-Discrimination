@@ -44,8 +44,8 @@ geckodriver_path = '/usr/bin/geckodriver'
 adblock_path = "/home/ubuntu/trulia/stores/adblock_plus-3.3.1-an+fx.xpi"
 uBlock_path = "/home/ubuntu/trulia/stores/uBlock0@raymondhill.net.xpi"
 
-if len(sys.argv) != 5:
-    print("Include start point, end point, destination, and debug (0 or 1) as arguments")
+if len(sys.argv) != 4:
+    print("Include start point, destination, and debug (0 or 1) as arguments")
     exit()
 
 def update_row(idx, destination):
@@ -77,7 +77,7 @@ def is_new(d):
 		else:
 			d['Is_New'] = 0
 	except:
-		d['Is_New'] = 0
+		d['Is_New'] = -1
 
 def update_rental_file(idx, d):
 	for key in d.keys():
@@ -128,11 +128,11 @@ def start_driver():
         driver.quit()
         restart("logfile", debug, start)
 
-rentals_path = "days_on_trulia_11_7.csv"
+rentals_path = "new_urls.csv" #SET THIS
 start = int(sys.argv[1])
-end = int(sys.argv[2])
-destination = sys.argv[3]
-debug = int(sys.argv[4])
+end = rentals_path.shape[0] + 1
+destination = sys.argv[2]
+debug = int(sys.argv[3])
 rentals = pd.read_csv(rentals_path)
 if end > rentals.shape[0]:
     end = rentals.shape[0]

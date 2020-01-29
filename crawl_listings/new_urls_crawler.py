@@ -25,16 +25,18 @@ from util import start_firefox, restart, wait_and_get
 import pytz
 
 def get_destination(tz):
-    now = datetime.now(tz)
-    print("Current time = {}".format(now.strftime("%m/%d %H:%M:%S")))
-    today = now.strftime("%m_%d_%y")
-    new_dir = root + "rounds/day_{}".format(today)
-    if not os.path.exists(new_dir):
-        os.mkdir(new_dir)
-        print("Creating directory " + new_dir)
-    dest = new_dir + "/urls_{}.csv".format(today, today)
-    print("Writing to " + dest)
-    return dest
+    #now = datetime.now(tz)
+    #print("Current time = {}".format(now.strftime("%m/%d %H:%M:%S")))
+    #today = now.strftime("%m_%d_%y")
+    #new_dir = root + "rounds/day_{}".format(today)
+    #if not os.path.exists(new_dir):
+    #    os.mkdir(new_dir)
+    #    print("Creating directory " + new_dir)
+    #dest = new_dir + "/urls_{}.csv".format(today, today)
+    #print("Writing to " + dest)
+    #return dest
+    new_dir = root + "rounds/day_2_3.csv"
+    return new_dir
 
 root = '/home/ubuntu/CBSA-Discrimination/'
 geckodriver_path = root + 'stores/geckodriver'
@@ -55,7 +57,7 @@ if len(sys.argv) != 3:
 
 tz = pytz.timezone('America/Chicago')
 dest = get_destination(tz)
-zip_csv = root + "rounds/selected_zip_20.csv"
+zip_csv = root + "rounds/selected_zips_3.csv"
 
 logfile = sys.argv[1]
 start = int(sys.argv[2])
@@ -64,24 +66,31 @@ zip_start = 0
 df_zip    = pd.read_csv(zip_csv) 
 zip_list =  list(df_zip['ZIP'].values.flatten())
 cbsa_list = list(df_zip['CBSA'].values.flatten())
+downtown_list = list(df_zip['downtown'].values.flatten())
 
-driver = start_firefox('https://www.trulia.com', geckodriver_path, adblock_path, uBlock_path)
+try:
+	driver = start_firefox('https://www.trulia.com', geckodriver_path, adblock_path, uBlock_path)
+except:
+	print("Failed to start driver. Restarting...")
+	sleep(random.randint(10,20))
+	restart(logfile, start)
 
 listings_all = []
 with open(dest, "a+") as f:
 	writer = csv.writer(f)
         if start == 0:
-	        writer.writerow(["CBSA", "ZIP", "URL"])
+	        writer.writerow(["CBSA", "ZIP", "downtown", "URL"])
 	for i in range(start, len(zip_list)):
                 zipcode = zip_list[i]
                 cbsa = cbsa_list[i]
+		downtown = cbsa_list[i]
                 if int(zipcode) < 10000:
                     zipcode = '0' + str(zipcode)
 		if zip_start != 0: 
-			zip_url = ZIP_URL_PRE + str(zip_list[i]) + ZIP_URL_SUF + '/' + str(zip_start) + ZIP_URL_PAGE 
+			zip_url = ZIP_URL_PRE + str(zipcode) + ZIP_URL_SUF + '/' + str(zip_start) + ZIP_URL_PAGE 
 			counter = zip_start
 		else: 
-			zip_url = ZIP_URL_PRE + str(zip_list[i]) + ZIP_URL_SUF 
+			zip_url = ZIP_URL_PRE + str(zipcode) + ZIP_URL_SUF 
 			counter      = 0
                 print(zip_url)
                 try:
@@ -118,9 +127,10 @@ with open(dest, "a+") as f:
 
 			listings_on_page = [page for page in listings_on_page if page not in listings_all]
 			listings_all = (listings_all) + listings_on_page
-			listings_on_page = [[cbsa, zipcode, page] for page in listings_on_page]
+			listings_on_page = [[cbsa, zipcode, downtown, page] for page in listings_on_page]
 			writer.writerows(listings_on_page)
 			#print(listings_on_page)
+			f.flush()
                         if len(listings_on_page) != 0:
                             print('Page {}: Number of listings: {}'.format(counter + 1, len(listings_on_page)))
 			    print('\tTotal length of listings: {}'.format(len(listings_all)))
@@ -129,7 +139,7 @@ with open(dest, "a+") as f:
 			counter += 1
 			if counter < num_pages:
 				driver.get(zip_url+str(counter) + '_p')
-				sleep(5)
+				sleep(random.randint(2, 6))
                 with open(logfile, "ab") as log:
                         filewriter = csv.writer(log, delimiter = ',', quoting = csv.QUOTE_MINIMAL)
                         filewriter.writerow([i])
