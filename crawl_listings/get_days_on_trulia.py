@@ -32,20 +32,19 @@ from selenium.common.exceptions import NoAlertPresentException
 from selenium.webdriver.common.proxy import Proxy
 
 from save_to_file import save_rental
-from ejscreen.ejscreen import handle_ejscreen_input, extract_pollution
-from extract.extract_data import extract_rental, check_off_market, extract_commute
+from extract.extract_data import extract_rental, check_off_market
 import extract.rental.extract_rental_data as rental
 import extract.sold_rental.extract_sold_rental_data as sold
-from util.util import start_firefox, restart
-from extract import shop, school, crime, basic_info as info
+import basic_info as info
+from util import start_firefox, restart
 
 trulia = "https://www.trulia.com"
 geckodriver_path = '/usr/bin/geckodriver'
-adblock_path = "/home/ubuntu/trulia/stores/adblock_plus-3.3.1-an+fx.xpi"
-uBlock_path = "/home/ubuntu/trulia/stores/uBlock0@raymondhill.net.xpi"
+adblock_path = "/home/ubuntu/CBSA-Discrimination/stores/adblock_plus-3.3.1-an+fx.xpi"
+uBlock_path = "/home/ubuntu/CBSA-Discrimination/stores/uBlock0@raymondhill.net.xpi"
 
-if len(sys.argv) != 4:
-    print("Include start point, destination, and debug (0 or 1) as arguments")
+if len(sys.argv) != 3:
+    print("Include start point and destination as arguments")
     exit()
 
 def update_row(idx, destination):
@@ -64,6 +63,7 @@ def get_new_info(idx, off_market):
 	print("Collecting Basic Info")
 	d = {}
 	info.extract_basic_info(driver, d, off_market)
+        rentals.at[idx, 'Off_market'] = off_market
 	is_new(d)
 	rentals.at[idx, 'Days_On_Trulia'] = d.get('Days_On_Trulia', "NA")
 	rentals.at[idx, 'Is_New'] = d['Is_New']
@@ -92,7 +92,7 @@ def open_page(url):
     driver.get(url)
     print(driver.title)
     sleep(3)
-    if "Real Estate, " in driver.title or "Not Found" in driver.title:
+    if "Not Found" in driver.title:
         print ("404 in trulia")
         return 1
     elif "Trulia" in driver.title:
@@ -101,8 +101,8 @@ def open_page(url):
     else:
         print ("Being blocked from accessing Trulia. Restarting...")
         driver.quit()
-        restart("logfile", debug, start)
-        return 1
+        sleep(random.randint(10,40))
+        restart("logfile", start)
 
 def finish_listing(driver, idx):
     with open("logfile", "ab") as log:
@@ -114,7 +114,6 @@ def finish_listing(driver, idx):
     sleep(random.randint(10,40))
 
 def start_driver():
-    print("Starting Driver")
     driver = start_firefox(trulia, geckodriver_path, adblock_path, uBlock_path)
     sleep(5)
 
@@ -126,20 +125,15 @@ def start_driver():
     except:
         print ("Switching window failed??")
         driver.quit()
-        restart("logfile", debug, start)
+        restart("logfile", start)
 
-rentals_path = "new_urls.csv" #SET THIS
+rentals_path = "new_urls_3_crawled.csv" #SET THIS
 start = int(sys.argv[1])
-end = rentals_path.shape[0] + 1
 destination = sys.argv[2]
-debug = int(sys.argv[3])
 rentals = pd.read_csv(rentals_path)
-if end > rentals.shape[0]:
-    end = rentals.shape[0]
-rentals['Days_On_Trulia'] = rentals['Days_On_Trulia'].astype(str)
+end = rentals.shape[0]
+#rentals['Days_On_Trulia'] = rentals['Days_On_Trulia'].astype(str)
 print("Collecting info from {} to {}".format(start, end))
-if debug == 1:
-    print("DEBUG = TRUE")
 driver = start_driver()
 if driver != None:
     print("Driver Successfully Started")
