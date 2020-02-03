@@ -9,7 +9,7 @@ if len(sys.argv) != 3:
 
 day1 = sys.argv[1]
 day2 = sys.argv[2]
-destination = "../rounds/new_urls_3_0-1.csv"
+destination = "../rounds/new_urls_3_2-3.csv"
 print("Day 1: " + day1)
 print("Day 2: " + day2)
 
@@ -23,12 +23,13 @@ for idx in tqdm(range(df_2.shape[0]), desc="Finding new listings", bar_format="{
 	url = df_2.at[idx, 'URL']
 	cbsa = df_2.at[idx, 'CBSA']
 	zipcode = df_2.at[idx, 'ZIP']
+	downtown = df_2.at[idx, 'downtown']
 	if url not in urls_1:
-		result.append([cbsa, zipcode, url])
+		result.append([cbsa, zipcode, downtown, url])
 
 with open(destination, 'w') as f:
 	csv_writer = csv.writer(f, delimiter=',')
-	csv_writer.writerow(["CBSA", "ZIP", "URL"])
+	csv_writer.writerow(["CBSA", "ZIP", "downtown", "URL"])
 	for url in result:
 		csv_writer.writerow(url)
 

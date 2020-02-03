@@ -4,6 +4,7 @@ import csv
 import sys
 import math
 import random
+import psutil
 import pandas as pd 
 from time import sleep 
 from selenium import webdriver
@@ -21,8 +22,43 @@ from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.common.exceptions import ElementNotInteractableException
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from datetime import date, timedelta, datetime
-from util import start_firefox, restart, wait_and_get
+from util import start_firefox, wait_and_get
 import pytz
+
+def restart(crawler_log, start, page_number):
+	print("argv was",sys.argv)
+	print("Restarting")
+
+	sleep(5)
+	#try:
+	for proc in psutil.process_iter():
+		if "firefox" in proc.name():
+			proc.kill()
+		if "geckodriver" in proc.name():
+			proc.kill()
+
+        #except:
+        #        print("Error killing processes. Continuing")
+
+        if os.path.isfile(crawler_log) == True:
+                with open(crawler_log) as f:
+                        lines = f.readlines()
+        else:
+                lines = [str(start)]
+
+        arg = []
+
+        find_start = False
+        for i, n in enumerate(sys.argv):
+                if n.isdigit() and not find_start:
+                        arg.append(str(int(lines[-1].rstrip())+1) if os.path.isfile(crawler_log) == True else lines[-1].rstrip())
+                        find_start = True
+                else:
+                        arg.append(n)
+
+        print(arg)
+        os.execv(sys.executable, ['python'] + arg)
+
 
 def get_destination(tz):
     #now = datetime.now(tz)
@@ -35,7 +71,7 @@ def get_destination(tz):
     #dest = new_dir + "/urls_{}.csv".format(today, today)
     #print("Writing to " + dest)
     #return dest
-    new_dir = root + "rounds/day_2_3.csv"
+    new_dir = root + "rounds/round_0_day_1_1.csv"
     return new_dir
 
 root = '/home/ubuntu/CBSA-Discrimination/'
@@ -48,10 +84,10 @@ ZIP_URL_SUF = '_zip/'#3_beds/2_baths/'
 ZIP_URL_PAGE = '_p'
 
 # read in zip code csv file 
-if len(sys.argv) != 3: 
+if len(sys.argv) != 4: 
 	print('-------------------------------------------------')
 	print('REQUIRED ARGUMENTS:')
-	print('python new_url_crawler.py logfile start')
+	print('python new_url_crawler.py logfile start page_number')
 	print('-------------------------------------------------')
 	exit()
 
@@ -61,8 +97,8 @@ zip_csv = root + "rounds/selected_zips_3.csv"
 
 logfile = sys.argv[1]
 start = int(sys.argv[2])
+zip_start = int(sys.argv[3])
 
-zip_start = 0
 df_zip    = pd.read_csv(zip_csv) 
 zip_list =  list(df_zip['ZIP'].values.flatten())
 cbsa_list = list(df_zip['CBSA'].values.flatten())
@@ -73,7 +109,7 @@ try:
 except:
 	print("Failed to start driver. Restarting...")
 	sleep(random.randint(10,20))
-	restart(logfile, start)
+	restart(logfile, start, zip_start)
 
 listings_all = []
 with open(dest, "a+") as f:
@@ -83,7 +119,7 @@ with open(dest, "a+") as f:
 	for i in range(start, len(zip_list)):
                 zipcode = zip_list[i]
                 cbsa = cbsa_list[i]
-		downtown = cbsa_list[i]
+		downtown = downtown_list[i]
                 if int(zipcode) < 10000:
                     zipcode = '0' + str(zipcode)
 		if zip_start != 0: 
@@ -99,12 +135,12 @@ with open(dest, "a+") as f:
                     print("Unable to get URL. Most likely Timing Out. Restarting...")
                     driver.quit()
                     sleep(random.randint(10,40))
-                    restart(logfile, start)
+                    restart(logfile, start, zip_start)
                 if "this page" in driver.title.lower():
                     print ("Being blocked from accessing Trulia. Restarting...")
                     driver.quit()
                     sleep(random.randint(60,120))
-                    restart(logfile, start)
+                    restart(logfile, start, zip_start)
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 		num_listings = list(set(re.findall(r'\w*[0-9]* rentals? available on Trulia',driver.page_source)))
 		#print('Page Number: ' + str(counter))
@@ -139,7 +175,14 @@ with open(dest, "a+") as f:
 			counter += 1
 			if counter < num_pages:
 				driver.get(zip_url+str(counter) + '_p')
-				sleep(random.randint(2, 6))
+				sleep(random.randint(2, 4))
+				if "this page" in driver.title.lower():
+					print ("Being blocked from accessing Trulia before finishing zipcode. Restarting at page {}...".format(counter))
+		                    	driver.quit()
+                    			sleep(random.randint(60,120))
+                    			restart(logfile, start, counter)
+		
+		zip_start = 0
                 with open(logfile, "ab") as log:
                         filewriter = csv.writer(log, delimiter = ',', quoting = csv.QUOTE_MINIMAL)
                         filewriter.writerow([i])
