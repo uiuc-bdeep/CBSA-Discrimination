@@ -132,7 +132,10 @@ def send_message(driver,name, email, phone_num, address,url,send):
         error  += try_page_element(driver,element, ['Request Viewing'])
 
         element = '#main-content > div.BasicPageLayout__BasicPageLayoutContainer-sc-7vcr4x-0.gMTacw > div.BasicPageLayout__BasicPageContent-sc-7vcr4x-1.lhjvlp > div.HomeDetailsContentOverview__ContentWithLeadFormGrid-sc-1lql7o5-0.bHYvJo.Grid__GridContainer-sc-5ig2n4-1.coXJy > div.Grid__CellBox-sc-5ig2n4-0.HomeDetailsContentOverview__HiddenExceptLargeCell-sc-1lql7o5-1.ipOYVS > div > div > div.Tab__CardContainer-scl5w-0.dlLToU.Card-yrmhiy-0.eTYjnc.FlexContainers__Rows-sc-1ezkc0e-0.hvPboF > div > div > form > div > div:nth-child(2) > div > div > button'
-        error  += try_page_element(driver,element, ['Request Viewing'])
+        error  += try_page_element(driver,element, ['Schedule a Tour'])
+
+	#element = '#main-content > div.BasicPageLayout__BasicPageLayoutContainer-sc-7vcr4x-0.gMTacw > div.BasicPageLayout__BasicPageContent-sc-7vcr4x-1.lhjvlp > div.HomeDetailsContentOverview__ContentWithLeadFormGrid-sc-1lql7o5-0.bHYvJo.Grid__GridContainer-sc-5ig2n4-1.coXJy > div.Grid__CellBox-sc-5ig2n4-0.HomeDetailsContentOverview__HiddenExceptLargeCell-sc-1lql7o5-1.ipOYVS > div > div > div.Grid__GridContainer-sc-5ig2n4-1.iNIiqB > div:nth-child(2) > button'
+	#error  += try_page_element(driver,element, ['Request	
 
 	if error > 0:
 		return 'SOLD'
