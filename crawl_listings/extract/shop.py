@@ -62,7 +62,7 @@ def extract_shop(driver, d, off_market):
                 sleep(2)
                 driver.save_screenshot("missing/missing-shop-buttons.png")
                 return -1
-	for i in range(2, min(len(buttons) + 1, 8)):
+	for i in range(2, min(len(buttons) + 1, 9)):
                 try:
 		        button = '//*[@id="modal-container"]/div/div[2]/div[2]/div/div[3]/div/div[1]/div/div[{}]/div/button'.format(i)
 		        count_shop(driver, button, d, i)
@@ -115,11 +115,11 @@ def set_empty_fields(d):
 			d[key] = 0
 		
 def set_NA(d):
-	d["Restaurants"] = -1	
-	d["Groceries"] = -1
-	d["Nightlife"] = -1
-	d["Cafes"] = -1
-	d["Shopping"] = -1
-	d["Entertainment"] = -1
-	d["Fitness"] = -1
-	print("\tSetting Shop data to -1")
+        d["Restaurants"] = "NA"	
+        d["Groceries"] = "NA"
+	d["Nightlife"] = "NA"
+	d["Cafes"] = "NA"
+	d["Shopping"] = "NA"
+	d["Entertainment"] = "NA"
+	d["Fitness"] = "NA"
+	print("\tSetting Shop data to NA")
