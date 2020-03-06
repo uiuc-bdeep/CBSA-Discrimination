@@ -43,7 +43,7 @@ def main():
 	if handled_state < (LPI * parameter_day_trial):
 		print_progress(handled_state,LPI,parameter_day_trial,person_id,name)
 
-		if url != None:
+                if url != None and "trulia" in url:
 			time_stamp     = send_message(driver,name, email, phone_num, address, url,parameter_send)  	# send out the inquiry and return the timestamp of when the inquiry was sent out
 
 			while time_stamp == "RESTART DRIVER":
