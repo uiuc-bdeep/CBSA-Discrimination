@@ -51,42 +51,36 @@ def check_off_market(driver):
 	is_off_market = 0
 
 	try:
-		off_market = driver.find_element_by_xpath("//*[@id='propertySummary']/div/div/div[2]/div/div[1]/div/span[1]").text
-		if "OFF" in off_market:
-			print("off market = 1")
-			is_off_market = 1
+	    off_market = driver.find_element_by_xpath("//*[@id='__next']/div/section/div[1]/div[1]/div/div/div[3]/div[1]/div/span/span").text
+	    if "off" in off_market.lower() or "sold" in off_market.lower():
+		print("Off market")
+		is_off_market = 1
 	except:
+	    try:
+		off_market = driver.find_element_by_xpath("//*[@id='__next']/div/section/div[1]/div[1]/div/div/div[3]/div[1]/span/span").text
+		if "off" in off_market.lower() or "sold" in off_market.lower():
+		    print("Off market")
+		    is_off_market = 1
+	    except:
 		try:
-			off_market = driver.find_element_by_xpath("//*[@id='marketStatusLabel']").text
-			if "off" in off_market.lower():
-				print("off market = 1")
-				is_off_market = 1
+		    off_market = driver.find_element_by_xpath("//*[@id='__next']/div/section/div[2]/div[1]/div/div/div[3]/div[1]/span[1]/span").text
+		    if "off" in off_market.lower() or "sold" in off_market.lower():
+			print("Off market")
+			is_off_market = 1
 		except:
-			try:
-				off_market = driver.find_element_by_xpath("//*[@id='__next']/div/section/div[1]/div[1]/div/div/div[3]/div[1]/div/span/span").text
-				if "off" in off_market.lower() or "sold" in off_market.lower():
-					print("off market = 2")
-					is_off_market = 2
-			except:
-				try:
-					off_market = driver.find_element_by_xpath("//*[@id='__next']/div/section/div[1]/div[1]/div/div/div[3]/div[1]/span/span").text
-					if "off" in off_market.lower() or "sold" in off_market.lower():
-						print("off market = 2")
-						is_off_market = 2
-				except:
-					try:
-						off_market = driver.find_element_by_xpath("//*[@id='__next']/div/section/div[2]/div[1]/div/div/div[3]/div[1]/span[1]/span").text
-						if "off" in off_market.lower() or "sold" in off_market.lower():
-							print("off_market = 2")
-							is_off_market = 2
-					except:
-						try:
-							off_market = driver.find_element_by_xpath("//*[@id='main-content']/div[2]/div[1]/div/div/div[3]/div[1]/span/span").text
-							if "off" in off_market.lower() or "sold" in off_market.lower():
-								print("off_market = 2")
-								is_off_market = 2
-						except:
-							print ("in market")
+		    try:
+			off_market = driver.find_element_by_xpath("//*[@id='main-content']/div[2]/div[1]/div/div/div[3]/div[1]/span/span").text
+			if "off" in off_market.lower() or "sold" in off_market.lower():
+			    print("Off market")
+			    is_off_market = 1
+		    except:
+                        try:
+                            off_market = driver.find_element_by_xpath('//*[@id="main-content"]/div[2]/div[1]/div/div/div[2]/div[1]/span/span').text
+                            if "off" in off_market.lower() or "sold" in off_market.lower():
+                                print("Off market")
+                                is_off_market = 1
+                        except:
+		            print ("On the market")
 
 	return is_off_market
 
