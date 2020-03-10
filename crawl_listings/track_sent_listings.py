@@ -132,31 +132,31 @@ def restart(crawler_log, round_num, start):
     print(current)
 
     if os.path.isfile(crawler_log):
-        arg[-1] = str(int(current[-1]) + 1)
+        arg[2] = str(int(current.split(',')[1]) + 1)
     else:
-        arg[-1] = current[-1]
+        arg[2] = current.split(',')[1]
 
     print(arg)
     os.execv(sys.executable, ['python'] + arg)
 
 
 round_num = int(sys.argv[1])
-round_max = 4
+round_max = 7
 start = int(sys.argv[2])
 for curr_round in range(round_num, round_max + 1): 
-    round_dir = "../rounds/round_{}/".format(round_num)
-    rentals_path = round_dir + "round_{}_rentals.csv".format(round_num)
+    round_dir = "../rounds/round_{}/".format(curr_round)
+    rentals_path = round_dir + "round_{}_rentals.csv".format(curr_round)
     rentals = pd.read_csv(rentals_path)
     end = rentals.shape[0]
     tz = pytz.timezone('America/Chicago')
     now = datetime.now(tz)
     print("Starting time = {}".format(now.strftime("%m/%d %H:%M:%S")))
-    print("Collecting info from {} to {} for round {}".format(start, end, round_num))
+    print("Collecting info from {} to {} for round {}".format(start, end, curr_round))
     driver = start_driver()
     if driver != None:
         print("Driver Successfully Started")
     for i in range(start, end):
-        update_row(i, rentals_path, round_num)
+        update_row(i, rentals_path, curr_round)
     now = datetime.now(tz)
     print("Finished round {} at {}".format(curr_round, now.strftime("%m/%d %H:%M:%S")))
     start = 0
