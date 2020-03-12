@@ -12,6 +12,8 @@ from sys import exit
 from time import sleep
 from re import sub
 from fake_useragent import UserAgent
+from datetime import datetime
+import pytz
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -31,12 +33,8 @@ from selenium.common.exceptions import WebDriverException
 from selenium.common.exceptions import NoAlertPresentException
 from selenium.webdriver.common.proxy import Proxy
 
-from save_to_file import save_rental
-from extract.extract_data import extract_rental, check_off_market
-import extract.rental.extract_rental_data as rental
-import extract.sold_rental.extract_sold_rental_data as sold
-import basic_info as info
-from util import start_firefox, restart
+from extract.extract_data import check_off_market
+from util import start_firefox
 
 trulia = "https://www.trulia.com"
 geckodriver_path = '/usr/bin/geckodriver'
@@ -44,52 +42,32 @@ adblock_path = "/home/ubuntu/CBSA-Discrimination/stores/adblock_plus-3.3.1-an+fx
 uBlock_path = "/home/ubuntu/CBSA-Discrimination/stores/uBlock0@raymondhill.net.xpi"
 
 if len(sys.argv) != 3:
-    print("Include start point and destination as arguments")
+    print("Include round_number and start point as argument")
     exit()
 
-def update_row(idx, destination):
+def update_row(idx, destination, round_num):
     url = rentals["URL"][idx]
-    print(idx, url)
+    day = int(rentals["Days_crawled"][idx]) + 1
+    print("Round {} -- Index {} -- URL: {}".format(round_num, idx, url))
     result = open_page(url)
     if result == 0:
         is_off_market = check_off_market(driver)
-        if not is_off_market:
-            print("On the market")
-        get_new_info(idx, is_off_market)
+        rentals.at[idx, "Day_" + str(day)] = is_off_market
+        rentals.at[idx, "Days_crawled"] = day
         rentals.to_csv(destination, index=False)
-    finish_listing(driver, idx)
-
-def get_new_info(idx, off_market):
-	print("Collecting Basic Info")
-	d = {}
-	info.extract_basic_info(driver, d, off_market)
-        rentals.at[idx, 'Off_market'] = off_market
-	is_new(d)
-	rentals.at[idx, 'Days_On_Trulia'] = d.get('Days_On_Trulia', "NA")
-	rentals.at[idx, 'Is_New'] = d['Is_New']
-        return 1
-
-def is_new(d):
-	try:
-		new = driver.find_element_by_xpath('//*[@id="main-content"]/div[2]/div[1]/div/div/div[3]/div[1]/span[2]/span').text
-		if new.lower() == 'new':
-			d['Is_New'] = 1
-		else:
-			d['Is_New'] = 0
-	except:
-		d['Is_New'] = -1
-
-def update_rental_file(idx, d):
-	for key in d.keys():
-		#if isinstance(d[key], basestring):
-		rentals.at[idx, key] = d[key]
-		#else:
-		#	rentals.at[idx, key] = d[key]
+    finish_listing(driver, round_num, idx)
 
 def open_page(url):
     driver.delete_all_cookies()
     d = {}
-    driver.get(url)
+    waiting = True
+    while(waiting):
+        try:
+            driver.get(url)
+            waiting = False
+        except:
+            print("Error getting URL. Trying again in 30 seconds...")
+            sleep(30)
     print(driver.title)
     sleep(3)
     if "Not Found" in driver.title:
@@ -102,12 +80,12 @@ def open_page(url):
         print ("Being blocked from accessing Trulia. Restarting...")
         driver.quit()
         sleep(random.randint(10,40))
-        restart("logfile", start)
+        restart("logfile", round_num, start)
 
-def finish_listing(driver, idx):
+def finish_listing(driver, round_num, idx):
     with open("logfile", "ab") as log:
         filewriter = csv.writer(log, delimiter = ',', quoting = csv.QUOTE_MINIMAL)
-        filewriter.writerow([idx])
+        filewriter.writerow([round_num, idx])
 
     #driver.close()
     driver.switch_to_window(driver.window_handles[0])
@@ -125,19 +103,61 @@ def start_driver():
     except:
         print ("Switching window failed??")
         driver.quit()
-        restart("logfile", start)
+        restart("logfile", round_num, start)
 
-rentals_path = "new_urls_3_crawled.csv" #SET THIS
-start = int(sys.argv[1])
-destination = sys.argv[2]
-rentals = pd.read_csv(rentals_path)
-end = rentals.shape[0]
-#rentals['Days_On_Trulia'] = rentals['Days_On_Trulia'].astype(str)
-print("Collecting info from {} to {}".format(start, end))
-driver = start_driver()
-if driver != None:
-    print("Driver Successfully Started")
-for i in range(start, end):
-    update_row(i, destination)
+def restart(crawler_log, round_num, start):
+    print("argv was",sys.argv)
+    print("sys.executable was", sys.executable)
+    print("Restarting")
 
+    sleep(5)
+    try:
+        for proc in psutil.process_iter():
+            if "firefox" in proc.name():
+                proc.kill()
+            if "geckodriver" in proc.name():
+                proc.kill()
+
+    except:
+        print("Error killing processes. Continuing")
+        
+    if os.path.isfile(crawler_log) == True:
+        with open(crawler_log) as f:
+            lines = f.readlines()
+    else:
+        lines = [str(round_num) + "," + str(start)]
+   
+    arg = sys.argv
+    current = lines[-1].rstrip()
+    print(current)
+
+    if os.path.isfile(crawler_log):
+        arg[2] = str(int(current.split(',')[1]) + 1)
+    else:
+        arg[2] = current.split(',')[1]
+
+    print(arg)
+    os.execv(sys.executable, ['python'] + arg)
+
+
+round_num = int(sys.argv[1])
+round_max = 7
+start = int(sys.argv[2])
+for curr_round in range(round_num, round_max + 1): 
+    round_dir = "../rounds/round_{}/".format(curr_round)
+    rentals_path = round_dir + "round_{}_rentals.csv".format(curr_round)
+    rentals = pd.read_csv(rentals_path)
+    end = rentals.shape[0]
+    tz = pytz.timezone('America/Chicago')
+    now = datetime.now(tz)
+    print("Starting time = {}".format(now.strftime("%m/%d %H:%M:%S")))
+    print("Collecting info from {} to {} for round {}".format(start, end, curr_round))
+    driver = start_driver()
+    if driver != None:
+        print("Driver Successfully Started")
+    for i in range(start, end):
+        update_row(i, rentals_path, curr_round)
+    now = datetime.now(tz)
+    print("Finished round {} at {}".format(curr_round, now.strftime("%m/%d %H:%M:%S")))
+    start = 0
 
