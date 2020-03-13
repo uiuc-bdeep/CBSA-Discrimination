@@ -141,7 +141,7 @@ def restart(crawler_log, round_num, start):
 
 
 round_num = int(sys.argv[1])
-round_max = 7
+round_max = 4
 start = int(sys.argv[2])
 for curr_round in range(round_num, round_max + 1): 
     round_dir = "../rounds/round_{}/".format(curr_round)
