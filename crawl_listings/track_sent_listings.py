@@ -106,10 +106,7 @@ def start_driver():
         restart("logfile", round_num, start)
 
 def restart(crawler_log, round_num, start):
-    print("argv was",sys.argv)
-    print("sys.executable was", sys.executable)
     print("Restarting")
-
     sleep(5)
     try:
         for proc in psutil.process_iter():
@@ -121,27 +118,21 @@ def restart(crawler_log, round_num, start):
     except:
         print("Error killing processes. Continuing")
         
+    arg = sys.argv
     if os.path.isfile(crawler_log) == True:
         with open(crawler_log) as f:
             lines = f.readlines()
-    else:
-        lines = [str(round_num) + "," + str(start)]
-   
-    arg = sys.argv
-    current = lines[-1].rstrip()
-    print(current)
 
-    if os.path.isfile(crawler_log):
-        idx = int(current.split(',')[1])
+
+        round_number, idx = lines[-1].rstrip().split(',')
         if idx == 299:
-            arg[1] = str(int(current.split(',')[0]) + 1)
+            arg[1] = str(round_number + 1)
             arg[2] = str(0)
         else:
+            arg[1] = str(round_number)
             arg[2] = str(idx + 1)
-    else:
-        arg[2] = current.split(',')[1]
 
-    print(arg)
+    print("Using arguments: {}".format(arg))
     os.execv(sys.executable, ['python'] + arg)
 
 
