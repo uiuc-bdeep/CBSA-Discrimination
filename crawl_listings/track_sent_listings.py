@@ -132,7 +132,12 @@ def restart(crawler_log, round_num, start):
     print(current)
 
     if os.path.isfile(crawler_log):
-        arg[2] = str(int(current.split(',')[1]) + 1)
+        idx = int(current.split(',')[1])
+        if idx == 299:
+            arg[1] = str(int(current.split(',')[0]) + 1)
+            arg[2] = str(0)
+        else:
+            arg[2] = str(idx + 1)
     else:
         arg[2] = current.split(',')[1]
 
@@ -141,7 +146,7 @@ def restart(crawler_log, round_num, start):
 
 
 round_num = int(sys.argv[1])
-round_max = 4
+round_max = 10
 start = int(sys.argv[2])
 for curr_round in range(round_num, round_max + 1): 
     round_dir = "../rounds/round_{}/".format(curr_round)
