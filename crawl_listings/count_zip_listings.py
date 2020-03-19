@@ -94,7 +94,14 @@ def main(input_file, dest, start, crawler_log, geckodriver_path, adblock_path, u
 
 	    crawled_trulia = True
             url = url_from_zipcode(zipcode)
-	    driver.get(url)
+            loading = True
+            while(loading):
+                try:
+	            driver.get(url)
+                    loading = False
+                except:
+                    print("Error loading URL. Most likely timing out. Trying again soon...")
+                    sleep(random.randint(8, 12))
 	    #print(driver.title)
 	    sleep(3)
             if "this page" in driver.title.lower():
