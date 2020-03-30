@@ -48,6 +48,7 @@ def main():
 
 			while time_stamp == "RESTART DRIVER":
 				print('//////////////////////// RESTART ////////////////////////')
+				sleep(10)
 				restart(True,driver)
 
 			if time_stamp == "SOLD" or time_stamp == 'WAITLIST':
