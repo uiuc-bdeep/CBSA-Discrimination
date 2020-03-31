@@ -63,17 +63,15 @@ def main(input_file, dest, start, crawler_log, geckodriver_path, adblock_path, u
 	    adblock_path (String): Path to the adblock
 	    uBlock_path (String): Path to the uBlock
 	"""
-	
-	driver = start_firefox(trulia, geckodriver_path, adblock_path, uBlock_path)
-
-	sleep(5)
-
 	try:
+		driver = start_firefox(trulia, geckodriver_path, adblock_path, uBlock_path)
+		sleep(5)
 		driver.switch_to_window(driver.window_handles[1])
 		driver.close()
 		driver.switch_to_window(driver.window_handles[0])
 	except:
-		print ("switching window failed??")
+		print ("Not able to start Firefox. Restarting...")
+		sleep(5)
 		driver.quit()
 		restart(crawler_log, start)
 
