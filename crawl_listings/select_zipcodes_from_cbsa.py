@@ -7,13 +7,23 @@ from datetime import date, timedelta, datetime
 import pytz
 
 if len(sys.argv) != 2:
-    print("Must include destination as input")
+    print("Must include round number as input")
     exit()
 
 root = '/home/ubuntu/CBSA-Discrimination/'
 cbsa_df = pd.read_csv(root + 'rounds/cbsa_zipcode_counts.csv')
-dest = root + 'rounds/' + sys.argv[1]
-sample_size = 3 # Select 3 zipcodes downtown and 3 zipcodes uptown for each CBSA
+round_num = sys.argv[1]
+new_dir = root + 'rounds/round_' + str(round_num)
+if not os.path.exists(new_dir):
+	os.mkdir(new_dir)
+	print("Creating directory " + new_dir)
+else:
+	print("Directory {} already exists. Double check the round_number".format(new_dir))
+	exit()
+dest = new_dir + "/round_{}_selected_zips.csv".format(round_num)
+print("Writing to " + dest)
+
+sample_size = 4 # Select 4 zipcodes downtown and 4 zipcodes uptown for each CBSA
 
 def seperate_by_cbsa(cbsa_df):
     cbsa_dic = {}
@@ -74,6 +84,5 @@ cbsa_dic = seperate_by_cbsa(cbsa_df)
 selections = {}
 for cbsa in cbsa_dic.keys():
     selections[cbsa] = select_zips_from_cbsa(cbsa, cbsa_dic[cbsa])
-print(selections)
 write_selections_to_dest(selections, dest)
 

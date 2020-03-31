@@ -25,36 +25,43 @@ from datetime import date, timedelta, datetime
 from util import start_firefox, wait_and_get
 import pytz
 
-def restart(crawler_log, start, page_number):
+def restart(crawler_log, start, page_number, increment = True):
 	print("argv was",sys.argv)
 	print("Restarting")
 
 	sleep(5)
-	#try:
-	for proc in psutil.process_iter():
-		if "firefox" in proc.name():
-			proc.kill()
-		if "geckodriver" in proc.name():
-			proc.kill()
+	try:
+		for proc in psutil.process_iter():
+			if "firefox" in proc.name():
+				proc.kill()
+			if "geckodriver" in proc.name():
+				proc.kill()
 
-        #except:
-        #        print("Error killing processes. Continuing")
+        except:
+                print("Error killing processes. Continuing")
+
+	arg = sys.argv
 
         if os.path.isfile(crawler_log) == True:
                 with open(crawler_log) as f:
                         lines = f.readlines()
-        else:
-                lines = [str(start)]
+		idx = int(lines[-1].rstrip())
+		if increment:
+			idx += 1
+			page_number = 0
+		arg[2] = str(idx)
+		arg[3] = str(page_number)
+                
 
-        arg = []
+        #find_start = False
+        #for i, n in enumerate(sys.argv):
+        #        if n.isdigit() and not find_start:
+        #                arg.append(str(int(lines[-1].rstrip())+1) if os.path.isfile(crawler_log) == True else lines[-1].rstrip())
+        #                find_start = True
+        #        else:
+        #                arg.append(n)
 
-        find_start = False
-        for i, n in enumerate(sys.argv):
-                if n.isdigit() and not find_start:
-                        arg.append(str(int(lines[-1].rstrip())+1) if os.path.isfile(crawler_log) == True else lines[-1].rstrip())
-                        find_start = True
-                else:
-                        arg.append(n)
+	#arg[-1] = str(page_number)
 
         print(arg)
         os.execv(sys.executable, ['python'] + arg)
@@ -71,7 +78,7 @@ def get_destination(tz):
     #dest = new_dir + "/urls_{}.csv".format(today, today)
     #print("Writing to " + dest)
     #return dest
-    new_dir = root + "rounds/round_0_day_1_1.csv"
+    new_dir = root + "rounds/round_12/round_12_day_1.csv"
     return new_dir
 
 root = '/home/ubuntu/CBSA-Discrimination/'
@@ -93,7 +100,7 @@ if len(sys.argv) != 4:
 
 tz = pytz.timezone('America/Chicago')
 dest = get_destination(tz)
-zip_csv = root + "rounds/selected_zips_3.csv"
+zip_csv = root + "rounds/round_12/round_12_selected_zips.csv"
 
 logfile = sys.argv[1]
 start = int(sys.argv[2])
@@ -109,7 +116,7 @@ try:
 except:
 	print("Failed to start driver. Restarting...")
 	sleep(random.randint(10,20))
-	restart(logfile, start, zip_start)
+	restart(logfile, start, zip_start, False)
 
 listings_all = []
 with open(dest, "a+") as f:
@@ -135,12 +142,12 @@ with open(dest, "a+") as f:
                     print("Unable to get URL. Most likely Timing Out. Restarting...")
                     driver.quit()
                     sleep(random.randint(10,40))
-                    restart(logfile, start, zip_start)
+                    restart(logfile, start, zip_start, False)
                 if "this page" in driver.title.lower():
                     print ("Being blocked from accessing Trulia. Restarting...")
                     driver.quit()
                     sleep(random.randint(60,120))
-                    restart(logfile, start, zip_start)
+                    restart(logfile, start, zip_start, False)
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 		num_listings = list(set(re.findall(r'\w*[0-9]* rentals? available on Trulia',driver.page_source)))
 		#print('Page Number: ' + str(counter))
@@ -174,13 +181,19 @@ with open(dest, "a+") as f:
                             print("No listings on page {}".format(counter + 1))
 			counter += 1
 			if counter < num_pages:
-				driver.get(zip_url+str(counter) + '_p')
+				try:
+					driver.get(zip_url+str(counter) + '_p')
+				except:
+					print ("Failed to get URL. Most likely timing out. Restarting at page {}...".format(counter))
+                                        driver.quit()
+                                        sleep(random.randint(60,120))
+                                        restart(logfile, start, counter, False)
 				sleep(random.randint(2, 4))
 				if "this page" in driver.title.lower():
 					print ("Being blocked from accessing Trulia before finishing zipcode. Restarting at page {}...".format(counter))
 		                    	driver.quit()
                     			sleep(random.randint(60,120))
-                    			restart(logfile, start, counter)
+                    			restart(logfile, start, counter, False)
 		
 		zip_start = 0
                 with open(logfile, "ab") as log:
