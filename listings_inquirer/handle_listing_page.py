@@ -150,8 +150,14 @@ def send_message(driver,name, email, phone_num, address,url,send):
         element = '#main-content > div.BasicPageLayout__BasicPageLayoutContainer-sc-7vcr4x-0.gMTacw > div.BasicPageLayout__BasicPageContent-sc-7vcr4x-1.lhjvlp > div.HomeDetailsContentOverview__ContentWithLeadFormGrid-sc-1lql7o5-0.bHYvJo.Grid__GridContainer-sc-5ig2n4-1.coXJy > div.Grid__CellBox-sc-5ig2n4-0.HomeDetailsContentOverview__HiddenExceptLargeCell-sc-1lql7o5-1.ipOYVS > div > div > div.Tab__CardContainer-scl5w-0.dlLToU.Card-yrmhiy-0.eTYjnc.FlexContainers__Rows-sc-1ezkc0e-0.hvPboF > div > div > form > div > div:nth-child(2) > div > div > button'
         error  += try_page_element(driver,element, ['Schedule a Tour'])
 
+        element = '#main-content > div.BasicPageLayout__BasicPageLayoutContainer-sc-7vcr4x-0.gMTacw > div.BasicPageLayout__BasicPageContent-sc-7vcr4x-1.lhjvlp > div.Grid__GridContainer-sc-5ig2n4-1.coXJy.HomeDetailsContentOverview__ContentWithLeadFormGrid-sc-1lql7o5-0.bHYvJo > div.Grid__CellBox-sc-5ig2n4-0.HomeDetailsContentOverview__HiddenExceptLargeCell-sc-1lql7o5-1.ipOYVS > div > div.Box-sc-8ox7qa-0.jIGxjA.ScheduleTourTabs__TabContainer-sc-1967mpn-1.fQyGCH > div.FlexContainers__Rows-sc-1ezkc0e-0.hvPboF.Card-yrmhiy-0.eTYjnc.Tab__CardContainer-scl5w-0.dlLToU > div > div > form > div > div:nth-child(3) > div > div > button'
+        error += try_page_element(driver,element, ['Schedule a Tour'])
+
 	element = '#main-content > div.BasicPageLayout__BasicPageLayoutContainer-sc-7vcr4x-0.gMTacw > div.BasicPageLayout__BasicPageContent-sc-7vcr4x-1.lhjvlp > div.Grid__GridContainer-sc-5ig2n4-1.coXJy.HomeDetailsContentOverview__ContentWithLeadFormGrid-sc-1lql7o5-0.bHYvJo > div.Grid__CellBox-sc-5ig2n4-0.HomeDetailsContentOverview__HiddenExceptLargeCell-sc-1lql7o5-1.ipOYVS > div > div > div.HomeDetailsZOUpsell__StyledButtonContainer-sc-1gmnu52-1.fwmwsp > a'
-        error  += try_page_element(driver,element, ['Request an Offer'])	
+        error  += try_page_element(driver,element, ['Request an Offer'])
+
+        element = '#main-content > div.BasicPageLayout__BasicPageLayoutContainer-sc-7vcr4x-0.gMTacw > div.BasicPageLayout__BasicPageContent-sc-7vcr4x-1.lhjvlp > div.Grid__GridContainer-sc-5ig2n4-1.coXJy.HomeDetailsContentOverview__ContentWithLeadFormGrid-sc-1lql7o5-0.bHYvJo > div.Grid__CellBox-sc-5ig2n4-0.HomeDetailsContentOverview__HiddenExceptLargeCell-sc-1lql7o5-1.ipOYVS > div > div > div.Grid__CellBox-sc-5ig2n4-0.fHUtjJ > button'
+        error += try_page_element(driver,element, ['Check Availability'])
 
 	if error > 0:
 		return 'SOLD'
