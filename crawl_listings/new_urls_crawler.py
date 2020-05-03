@@ -25,7 +25,7 @@ from datetime import date, timedelta, datetime
 from util import start_firefox, wait_and_get
 import pytz
 
-def restart(crawler_log, start, page_number, increment = True):
+def restart(crawler_log, start, increment):
 	print("argv was",sys.argv)
 	print("Restarting")
 
@@ -48,9 +48,7 @@ def restart(crawler_log, start, page_number, increment = True):
 		idx = int(lines[-1].rstrip())
 		if increment:
 			idx += 1
-			page_number = 0
 		arg[2] = str(idx)
-		arg[3] = str(page_number)
                 
 
         #find_start = False
@@ -78,7 +76,7 @@ def get_destination(tz):
     #dest = new_dir + "/urls_{}.csv".format(today, today)
     #print("Writing to " + dest)
     #return dest
-    new_dir = root + "rounds/round_12/round_12_day_1.csv"
+    new_dir = root + "rounds/round_20/round_20_day_0_1.csv"
     return new_dir
 
 root = '/home/ubuntu/CBSA-Discrimination/'
@@ -87,24 +85,24 @@ adblock_path = root + "stores/adblock_plus-3.3.1-an+fx.xpi"
 uBlock_path = root + "stores/uBlock0@raymondhill.net.xpi"
 
 ZIP_URL_PRE = 'https://www.trulia.com/for_rent/'
-ZIP_URL_SUF = '_zip/'#3_beds/2_baths/'
+ZIP_URL_SUF = '_zip/date;d_sort/'#3_beds/2_baths/'
 ZIP_URL_PAGE = '_p'
 
 # read in zip code csv file 
-if len(sys.argv) != 4: 
+if len(sys.argv) != 3: 
 	print('-------------------------------------------------')
 	print('REQUIRED ARGUMENTS:')
-	print('python new_url_crawler.py logfile start page_number')
+	print('python new_url_crawler.py logfile start')
 	print('-------------------------------------------------')
 	exit()
 
 tz = pytz.timezone('America/Chicago')
 dest = get_destination(tz)
-zip_csv = root + "rounds/round_12/round_12_selected_zips.csv"
+zip_csv = root + "rounds/round_20/round_20_selected_zips.csv"
 
 logfile = sys.argv[1]
 start = int(sys.argv[2])
-zip_start = int(sys.argv[3])
+zip_start = 0
 
 df_zip    = pd.read_csv(zip_csv) 
 zip_list =  list(df_zip['ZIP'].values.flatten())
@@ -116,7 +114,7 @@ try:
 except:
 	print("Failed to start driver. Restarting...")
 	sleep(random.randint(10,20))
-	restart(logfile, start, zip_start, False)
+	restart(logfile, start, True)
 
 listings_all = []
 with open(dest, "a+") as f:
@@ -129,12 +127,8 @@ with open(dest, "a+") as f:
 		downtown = downtown_list[i]
                 if int(zipcode) < 10000:
                     zipcode = '0' + str(zipcode)
-		if zip_start != 0: 
-			zip_url = ZIP_URL_PRE + str(zipcode) + ZIP_URL_SUF + '/' + str(zip_start) + ZIP_URL_PAGE 
-			counter = zip_start
-		else: 
-			zip_url = ZIP_URL_PRE + str(zipcode) + ZIP_URL_SUF 
-			counter      = 0
+		zip_url = ZIP_URL_PRE + str(zipcode) + ZIP_URL_SUF 
+		counter = zip_start
                 print(zip_url)
                 try:
                     driver.get(zip_url)
@@ -142,12 +136,12 @@ with open(dest, "a+") as f:
                     print("Unable to get URL. Most likely Timing Out. Restarting...")
                     driver.quit()
                     sleep(random.randint(10,40))
-                    restart(logfile, start, zip_start, False)
+                    restart(logfile, start, True)
                 if "this page" in driver.title.lower():
                     print ("Being blocked from accessing Trulia. Restarting...")
                     driver.quit()
                     sleep(random.randint(60,120))
-                    restart(logfile, start, zip_start, False)
+                    restart(logfile, start, True)
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 		num_listings = list(set(re.findall(r'\w*[0-9]* rentals? available on Trulia',driver.page_source)))
 		#print('Page Number: ' + str(counter))
@@ -170,7 +164,7 @@ with open(dest, "a+") as f:
 
 			listings_on_page = [page for page in listings_on_page if page not in listings_all]
 			listings_all = (listings_all) + listings_on_page
-			listings_on_page = [[cbsa, zipcode, downtown, page] for page in listings_on_page]
+			listings_on_page = [[cbsa, zipcode, downtown, page, counter] for page in listings_on_page]
 			writer.writerows(listings_on_page)
 			#print(listings_on_page)
 			f.flush()
@@ -187,13 +181,13 @@ with open(dest, "a+") as f:
 					print ("Failed to get URL. Most likely timing out. Restarting at page {}...".format(counter))
                                         driver.quit()
                                         sleep(random.randint(60,120))
-                                        restart(logfile, start, counter, False)
+                                        restart(logfile, start, False)
 				sleep(random.randint(2, 4))
 				if "this page" in driver.title.lower():
 					print ("Being blocked from accessing Trulia before finishing zipcode. Restarting at page {}...".format(counter))
 		                    	driver.quit()
                     			sleep(random.randint(60,120))
-                    			restart(logfile, start, counter, False)
+                    			restart(logfile, start, False)
 		
 		zip_start = 0
                 with open(logfile, "ab") as log:
