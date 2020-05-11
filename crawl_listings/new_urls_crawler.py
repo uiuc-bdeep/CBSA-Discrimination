@@ -48,36 +48,10 @@ def restart(crawler_log, start, increment):
 		idx = int(lines[-1].rstrip())
 		if increment:
 			idx += 1
-		arg[2] = str(idx)
+		arg[-1] = str(idx)
                 
-
-        #find_start = False
-        #for i, n in enumerate(sys.argv):
-        #        if n.isdigit() and not find_start:
-        #                arg.append(str(int(lines[-1].rstrip())+1) if os.path.isfile(crawler_log) == True else lines[-1].rstrip())
-        #                find_start = True
-        #        else:
-        #                arg.append(n)
-
-	#arg[-1] = str(page_number)
-
         print(arg)
         os.execv(sys.executable, ['python'] + arg)
-
-
-def get_destination(tz):
-    #now = datetime.now(tz)
-    #print("Current time = {}".format(now.strftime("%m/%d %H:%M:%S")))
-    #today = now.strftime("%m_%d_%y")
-    #new_dir = root + "rounds/day_{}".format(today)
-    #if not os.path.exists(new_dir):
-    #    os.mkdir(new_dir)
-    #    print("Creating directory " + new_dir)
-    #dest = new_dir + "/urls_{}.csv".format(today, today)
-    #print("Writing to " + dest)
-    #return dest
-    new_dir = root + "rounds/round_20/round_20_day_0_1.csv"
-    return new_dir
 
 root = '/home/ubuntu/CBSA-Discrimination/'
 geckodriver_path = root + 'stores/geckodriver'
@@ -89,20 +63,27 @@ ZIP_URL_SUF = '_zip/date;d_sort/'#3_beds/2_baths/'
 ZIP_URL_PAGE = '_p'
 
 # read in zip code csv file 
-if len(sys.argv) != 3: 
+if len(sys.argv) != 5: 
 	print('-------------------------------------------------')
 	print('REQUIRED ARGUMENTS:')
-	print('python new_url_crawler.py logfile start')
+	print('python new_url_crawler.py logfile round day start')
 	print('-------------------------------------------------')
 	exit()
 
 tz = pytz.timezone('America/Chicago')
-dest = get_destination(tz)
-zip_csv = root + "rounds/round_20/round_20_selected_zips.csv"
+logfile = sys.argv[1]
+round_num = int(sys.argv[2])
+day_num = int(sys.argv[3])
+start = int(sys.argv[4])
+zip_csv = root + "rounds/round_{}/round_{}_selected_zips.csv".format(round_num, round_num)
+dest = root + "rounds/round_{}/round_{}_day_{}.csv".format(round_num, round_num, day_num)
 
 logfile = sys.argv[1]
 start = int(sys.argv[2])
 zip_start = 0
+
+if os.path.isfile(logfile) == True and start == 0:
+	print("Warning - logfile exists but startpoint is 0. Please make sure that this is correct")
 
 df_zip    = pd.read_csv(zip_csv) 
 zip_list =  list(df_zip['ZIP'].values.flatten())
@@ -120,7 +101,7 @@ listings_all = []
 with open(dest, "a+") as f:
 	writer = csv.writer(f)
         if start == 0:
-	        writer.writerow(["CBSA", "ZIP", "downtown", "URL"])
+	        writer.writerow(["CBSA", "ZIP", "downtown", "URL", "page_number"])
 	for i in range(start, len(zip_list)):
                 zipcode = zip_list[i]
                 cbsa = cbsa_list[i]
