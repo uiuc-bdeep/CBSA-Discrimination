@@ -77,9 +77,6 @@ day_num = int(sys.argv[3])
 start = int(sys.argv[4])
 zip_csv = root + "rounds/round_{}/round_{}_selected_zips.csv".format(round_num, round_num)
 dest = root + "rounds/round_{}/round_{}_day_{}.csv".format(round_num, round_num, day_num)
-
-logfile = sys.argv[1]
-start = int(sys.argv[2])
 zip_start = 0
 
 if os.path.isfile(logfile) == True and start == 0:
