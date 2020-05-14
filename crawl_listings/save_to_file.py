@@ -55,7 +55,7 @@ def save_rental(d, url, name):
 	"Hazardous_Waste_Proximity", "Wastewater_Discharge_Indicator", "Demographic_Index%",
 	"Minority_Population%", "Low_Income_Population%", "Linguistically_Isolated_Population%",
 	"Population_with_Less_Than_High_School_Education%", "Population_under_Age_5%", "Population_over_Age_64%",
-	"URL", "Short_form_ID"]
+	"URL", "Short_form_ID","Days_crawled"]
 
 	value = [d.get("address", "NA"), d.get("city", "NA"), d.get("state", "NA"), 
 	d.get("zip code", "NA"), d.get("rent_per_month", "NA"), d.get("Year", "NA"), 
@@ -78,7 +78,7 @@ def save_rental(d, url, name):
 	d.get("Hazardous Waste Proximity", "NA"), d.get("Wastewater Discharge Indicator", "NA"), d.get("Demographic Index", "NA"),
 	d.get("Minority Population", "NA"), d.get("Low Income Population", "NA"), d.get("Linguistically Isolated Population", "NA"),
 	d.get("Population with Less Than High School Education", "NA"), d.get("Population under Age 5", "NA"), d.get("Population over Age 64", "NA"),
-	url, d.get("short_form_id", "NA")]
+	url, d.get("short_form_id", "NA"), d.get("Days_crawled", "NA")]
 
 	with fd as csvfile:
 		filewriter = csv.writer(csvfile, delimiter = ',', quoting = csv.QUOTE_MINIMAL)
