@@ -41,12 +41,41 @@ from selenium.webdriver.common.proxy import Proxy
 from save_to_file import save_rental
 from ejscreen.ejscreen import handle_ejscreen_input, extract_pollution_from_report
 from extract.extract_data import extract_rental
-from util import start_firefox, restart
+from util import start_firefox
 
 trulia = "https://www.trulia.com"
 pollution = "https://www3.epa.gov/myem/envmap/find.html"
 
-def main(crawl_type, input_file, output_file, start, end, crawler_log, geckodriver_path, repair, debug_mode, adblock_path, uBlock_path):
+def restart(crawler_log, start):
+    print("argv was",sys.argv)
+    print("sys.executable was", sys.executable)
+    print("Restarting")
+
+    sleep(5)
+    try:
+        for proc in psutil.process_iter():
+            if "firefox" in proc.name():
+                proc.kill()
+            if "geckodriver" in proc.name():
+                proc.kill()
+    except:
+        print("Error killing processes. Continuing")
+
+    if os.path.isfile(crawler_log) == True:
+        with open(crawler_log) as f:
+            lines = f.readlines()
+    else:
+        lines = [str(start)]
+
+    arg = sys.argv
+    if os.path.isfile(crawler_log):
+            arg[-2] = str(int(lines[-1].rstrip())+1)
+
+    print(arg)
+    os.execv(sys.executable, ['python'] + arg)
+
+
+def main(crawl_type, round_number, start, end, crawler_log, geckodriver_path, repair, debug_mode, adblock_path, uBlock_path):
 	"""Main function to do the crawling
 	
 	Args:
@@ -67,6 +96,10 @@ def main(crawl_type, input_file, output_file, start, end, crawler_log, geckodriv
 
 	sleep(5)
 
+        base_dir = "/home/ubuntu/CBSA-Discrimination/"
+        input_file = base_dir + "rounds/round_{}/round_{}_selected_urls.csv".format(round_number, round_number)
+        output_file = base_dir + "rounds/round_{}/round_{}_rentals.csv".format(round_number, round_number)
+
 	try:
 		driver.switch_to_window(driver.window_handles[1])
 		driver.close()
@@ -79,6 +112,9 @@ def main(crawl_type, input_file, output_file, start, end, crawler_log, geckodriv
 	df = pd.read_csv(input_file)
 
 	urls = df["URL"]
+
+        if end < len(urls):
+            end = len(urls) - 1
 
 	if "L" in crawl_type:
 		location = df["LatLon"]
@@ -135,14 +171,14 @@ def main(crawl_type, input_file, output_file, start, end, crawler_log, geckodriv
 					else:
 				 		driver.quit()
 						print("Reached EXCEPT after extract_rental")
-				 		restart(crawler_log, debug_mode, start)
+				 		restart(crawler_log, start)
 				if flag == False:
 					crawled_trulia = False
 			elif "this page" in driver.title.lower():
 				print ("Being blocked from accessing Trulia. Restarting...")
                                 sleep(random.randint(10, 40))
 				driver.quit()
-				restart(crawler_log, debug_mode, start)
+				restart(crawler_log, start)
 			else:
 				crawled_trulia = False
 				address = driver.title.split(" - ")[0]
@@ -206,7 +242,8 @@ def main(crawl_type, input_file, output_file, start, end, crawler_log, geckodriv
 					print("cannot extract pollution. Restarting")
 					driver.quit()
 					restart(crawler_log, debug_mode, start)
-
+                        
+                        d["Days_crawled"] = 0
 			save_rental(d, urls[i], output_file)
 
 			with open(crawler_log, "ab") as log:
@@ -239,8 +276,7 @@ if __name__ == "__main__":
 
 	parser = argparse.ArgumentParser(description = 'Crawl Trulia apartment listings and ejscreen given Trulia URLs or Address (optional)', formatter_class=RawTextHelpFormatter, epilog = "Note that input_file must be a CSV file that contains a column 'URL'. \nIt can also contain (A)ddress or (L)atLon")
 	#parser.add_argument("type", help = "Whether the input file contains column (A)ddress or (L)atLon", choices = ["U", "A", "L"], nargs = "+")
-	parser.add_argument("input_file", help = "Path of input file")
-	parser.add_argument("output_file", help = "Path of output file")
+	parser.add_argument("round_number", help = "Round number to crawl")
 	parser.add_argument("log", help = "Name of the log")
 	parser.add_argument("start", help = "Start of Input file", type = int)
 	parser.add_argument("end", help = "End of Input file", type = int)
@@ -275,7 +311,7 @@ if __name__ == "__main__":
 		sys.exit("uBlock does not exist at {}\nAborting.".format(uBlock_path))
 
 	try:
-		main(crawl_type, args.input_file, args.output_file, args.start, args.end, args.log, geckodriver_path, args.repair, args.debug, adblock_path, uBlock_path)
+		main(crawl_type, args.round_number, args.start, args.end, args.log, geckodriver_path, args.repair, args.debug, adblock_path, uBlock_path)
 	except:
 		for proc in psutil.process_iter():
 			if proc.name() == "firefox" or proc.name() == "geckodriver":
