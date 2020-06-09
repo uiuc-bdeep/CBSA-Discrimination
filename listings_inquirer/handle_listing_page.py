@@ -227,9 +227,13 @@ def send_message(driver,name, email, phone_num, address,url,send):
                 	return 'RESTART DRIVER'
 
 	if send == 1:
-		print('Clicking...')
-		driver.save_screenshot("/home/ubuntu/trulia/scripts/confirmation.png")
-		send_handle.click()
+                try:
+		    print('Clicking...')
+		    driver.save_screenshot("/home/ubuntu/trulia/scripts/confirmation.png")
+		    send_handle.click()
+                except:
+                    print('Cannot Click Send Button')
+                    return 'RESTART DRIVER'
 
 		time_sent = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 		print('Send Status: Sent')
