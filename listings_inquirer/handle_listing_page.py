@@ -11,7 +11,7 @@ from wait_and_get import wait_and_get
 NAME_CSS    = ["#name_PDP_TOP_THIRD", "#nameInput"]
 EMAIL_CSS   = ["#email_PDP_TOP_THIRD", "#emailInput"]
 PHONE_CSS   = ["#phone_PDP_TOP_THIRD","#phoneInput"]
-SEND_CSS    = ['#main-content > div.BasicPageLayout__BasicPageLayoutContainer-sc-7vcr4x-0.gMTacw > div.BasicPageLayout__BasicPageContent-sc-7vcr4x-1.lhjvlp > div.HomeDetailsContentOverview__ContentWithLeadFormGrid-sc-1lql7o5-0.bHYvJo.Grid__GridContainer-sc-5ig2n4-1.coXJy > div.Grid__CellBox-sc-5ig2n4-0.HomeDetailsContentOverview__HiddenExceptLargeCell-sc-1lql7o5-1.eNNXco > div > div > form > div > div:nth-child(2) > div > button', '#main-content > div.BasicPageLayout__BasicPageLayoutContainer-sc-7vcr4x-0.gMTacw > div.BasicPageLayout__BasicPageContent-sc-7vcr4x-1.lhjvlp > div.HomeDetailsContentOverview__ContentWithLeadFormGrid-sc-1lql7o5-0.bHYvJo.Grid__GridContainer-sc-5ig2n4-1.coXJy > div.Grid__CellBox-sc-5ig2n4-0.HomeDetailsContentOverview__HiddenExceptLargeCell-sc-1lql7o5-1.ipOYVS > div > div > form > div > div:nth-child(2) > div > div > button']
+SEND_CSS    = ['#main-content > div.BasicPageLayout__BasicPageLayoutContainer-sc-7vcr4x-0.gMTacw > div.BasicPageLayout__BasicPageContent-sc-7vcr4x-1.lhjvlp > div.HomeDetailsContentOverview__ContentWithLeadFormGrid-sc-1lql7o5-0.bHYvJo.Grid__GridContainer-sc-5ig2n4-1.coXJy > div.Grid__CellBox-sc-5ig2n4-0.HomeDetailsContentOverview__HiddenExceptLargeCell-sc-1lql7o5-1.eNNXco > div > div > form > div > div:nth-child(2) > div > button', '#main-content > div.BasicPageLayout__BasicPageLayoutContainer-sc-7vcr4x-0.gMTacw > div.BasicPageLayout__BasicPageContent-sc-7vcr4x-1.lhjvlp > div.HomeDetailsContentOverview__ContentWithLeadFormGrid-sc-1lql7o5-0.bHYvJo.Grid__GridContainer-sc-5ig2n4-1.coXJy > div.Grid__CellBox-sc-5ig2n4-0.HomeDetailsContentOverview__HiddenExceptLargeCell-sc-1lql7o5-1.ipOYVS > div > div > form > div > div:nth-child(2) > div > div > button', '#main-content > div.BasicPageLayout__BasicPageLayoutContainer-sc-7vcr4x-0.gaIQl > div.BasicPageLayout__BasicPageContent-sc-7vcr4x-1.eGqAVA > div.Grid__GridContainer-sc-5ig2n4-1.eVbKXM.HomeDetailsContentOverview__ContentWithLeadFormGrid-sc-1lql7o5-0.iBTtFV > div.Grid__CellBox-sc-5ig2n4-0.HomeDetailsContentOverview__HiddenExceptLargeCell-sc-1lql7o5-1.kICla-d > div > div > form > div > div:nth-child(2) > div > div > button']
 #MESSAGE_CSS = '#topPanelLeadForm > div > div > span > div > div.madlibsForm.form > div:nth-child(6) > a'
 #TEXTB_CSS   = '#textarea'
 
@@ -162,8 +162,9 @@ def send_message(driver,name, email, phone_num, address,url,send):
 	element = '#main-content > div.BasicPageLayout__BasicPageLayoutContainer-sc-7vcr4x-0.gMTacw > div.BasicPageLayout__BasicPageContent-sc-7vcr4x-1.lhjvlp > div.Grid__GridContainer-sc-5ig2n4-1.coXJy.HomeDetailsContentOverview__ContentWithLeadFormGrid-sc-1lql7o5-0.bHYvJo > div.Grid__CellBox-sc-5ig2n4-0.HomeDetailsContentOverview__HiddenExceptLargeCell-sc-1lql7o5-1.ipOYVS > div > div > div.HomeDetailsZOUpsell__StyledButtonContainer-sc-1gmnu52-1.fwmwsp > a'
         error  += try_page_element(driver,element, ['Request an Offer'])
 
-        element = '#main-content > div.BasicPageLayout__BasicPageLayoutContainer-sc-7vcr4x-0.gMTacw > div.BasicPageLayout__BasicPageContent-sc-7vcr4x-1.lhjvlp > div.Grid__GridContainer-sc-5ig2n4-1.coXJy.HomeDetailsContentOverview__ContentWithLeadFormGrid-sc-1lql7o5-0.bHYvJo > div.Grid__CellBox-sc-5ig2n4-0.HomeDetailsContentOverview__HiddenExceptLargeCell-sc-1lql7o5-1.ipOYVS > div > div > div.Grid__CellBox-sc-5ig2n4-0.fHUtjJ > button'
-        error += try_page_element(driver,element, ['Check Availability'])
+        #element = '#main-content > div.BasicPageLayout__BasicPageLayoutContainer-sc-7vcr4x-0.gMTacw > div.BasicPageLayout__BasicPageContent-sc-7vcr4x-1.lhjvlp > div.Grid__GridContainer-sc-5ig2n4-1.coXJy.HomeDetailsContentOverview__ContentWithLeadFormGrid-sc-1lql7o5-0.bHYvJo > div.Grid__CellBox-sc-5ig2n4-0.HomeDetailsContentOverview__HiddenExceptLargeCell-sc-1lql7o5-1.ipOYVS > div > div > div.Grid__CellBox-sc-5ig2n4-0.fHUtjJ > button'
+        #error += try_page_element(driver,element, ['Check Availability'])
+
 
 	if error > 0:
 		return 'SOLD'
