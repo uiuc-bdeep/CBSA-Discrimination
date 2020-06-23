@@ -39,6 +39,7 @@ from selenium.common.exceptions import NoAlertPresentException
 from selenium.webdriver.common.proxy import Proxy
 
 from save_to_file import save_rental
+import add_lat_long_from_address as lat_long
 from ejscreen.ejscreen import handle_ejscreen_input, extract_pollution_from_report
 from extract.extract_data import extract_rental
 from util import start_firefox
@@ -107,11 +108,13 @@ def main(crawl_type, round_number, start, end, crawler_log, geckodriver_path, re
 	except:
 		print ("switching window failed??")
 		driver.quit()
-		restart(crawler_log, debug_mode, start)
+		restart(crawler_log, start)
 
 	df = pd.read_csv(input_file)
 
 	urls = df["URL"]
+	cbsas = df["CBSA"]
+	downtowns = df["downtown"]
 
         if end < len(urls):
             end = len(urls) - 1
@@ -184,8 +187,6 @@ def main(crawl_type, round_number, start, end, crawler_log, geckodriver_path, re
 				address = driver.title.split(" - ")[0]
 				print("Trulia is not available. Continuing")
 
-			print("Trulia crawling done. Crawling ejscreen now")
-
 			if repair:
 				df.to_csv(input_file, index = False)
 				with open(crawler_log, "ab") as log:
@@ -215,10 +216,6 @@ def main(crawl_type, round_number, start, end, crawler_log, geckodriver_path, re
 				if crawled_trulia == False and "Real Estate, " in driver.title:
 					address = "NA"
 
-			driver.execute_script("window.open('https://ejscreen.epa.gov/mapper/mobile/', 'new_tab')")
-			sleep(5)
-			driver.switch_to_window(driver.window_handles[1])
-
 			# if (len(address) < 10):
 			# 	save_data(d, urls[i], output_file, crawl_type)
 			# 	with open(crawler_log, "ab") as log:
@@ -227,8 +224,12 @@ def main(crawl_type, round_number, start, end, crawler_log, geckodriver_path, re
 			# 	continue
 
 			try:
+				print("Trulia crawling done. Skipping ejscreen for now")
+				#driver.execute_script("window.open('https://ejscreen.epa.gov/mapper/mobile/', 'new_tab')")
+				sleep(5)
+				#driver.switch_to_window(driver.window_handles[1])
 				#handle_ejscreen_input(driver, address)
-				sleep(1)
+				#sleep(1)
 				#extract_pollution_from_report(driver, d)
 				#print("Skipping ejscreen")
 			except:
@@ -244,14 +245,18 @@ def main(crawl_type, round_number, start, end, crawler_log, geckodriver_path, re
 					restart(crawler_log, debug_mode, start)
                         
                         d["Days_crawled"] = 0
+			d["CBSA"] = cbsas[i]
+			d["Downtown"] = downtowns[i]
+			d["Error_sending"] = 0
+			d["lat"], d["lon"] = lat_long.get_coordinates(d["address"], d["city"], d["state"])
 			save_rental(d, urls[i], output_file)
 
 			with open(crawler_log, "ab") as log:
 				filewriter = csv.writer(log, delimiter = ',', quoting = csv.QUOTE_MINIMAL)
 				filewriter.writerow([i])
 				
-			driver.close()
-			driver.switch_to_window(driver.window_handles[0])
+			#driver.close()
+			#driver.switch_to_window(driver.window_handles[0])
 
 			sleep(random.randint(10,40))
 	except:

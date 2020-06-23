@@ -101,13 +101,13 @@ def count_crime(driver, crime, xpath):
 		return -1
 
 def set_NA(d):
-	d["Assault"] = -1
-	d["Theft"] = -1
-	d["Arrest"] = -1
-	d["Vandalism"] = -1
-	d["Burglary"] = -1
-	d["Crime_Relative"] = -1
-	print("\tSetting all crime values to -1")
+	d["Assault"] = "NA"
+	d["Theft"] = "NA"
+	d["Arrest"] = "NA"
+	d["Vandalism"] = "NA"
+	d["Burglary"] = "NA"
+	d["Crime_Relative"] = "NA"
+	print("\tSetting all crime values to NA")
 
 def extract_crime_old(driver, d):
         try:

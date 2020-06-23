@@ -98,10 +98,10 @@ def find_button(driver, xpath_list):
 	return -1
 
 def set_NA(d):
-	d["Elementary_School_Count"] = -1
-	d["Elementary_School_Avg_Score"] = -1
-	d["Middle_School_Count"] = -1
-	d["Middle_School_Avg_Score"] = -1
-	d["High_School_Count"] = -1
-	d["High_School_Avg_Score"] = -1
+	d["Elementary_School_Count"] = -"NA"
+	d["Elementary_School_Avg_Score"] = "NA"
+	d["Middle_School_Count"] = "NA"
+	d["Middle_School_Avg_Score"] = "NA"
+	d["High_School_Count"] = "NA"
+	d["High_School_Avg_Score"] = "NA"
 	print("\tUnable to find any school info - setting to NA")

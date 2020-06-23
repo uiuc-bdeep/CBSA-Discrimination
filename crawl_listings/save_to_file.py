@@ -40,12 +40,12 @@ def save_rental(d, url, name):
 	else:
 		fd = open(name, "wb")
 
-	header = ["Address", "City", "State", "Zip_Code", "Rent_Per_Month", "Year", "Days_on_Trulia", "Type", "Sqft", "Phone_Number"]
+	header = ["Address", "City", "State", "Zip_Code", "CBSA", "Rent_Per_Month", "Year", "Days_on_Trulia", "Downtown", "Error_sending", "Type", "Sqft", "Phone_Number"]
 	header = header + ["Bedroom_min", "Bedroom_max","Bathroom_min", "Bathroom_max"]
 	header = header + ["Assault", "Arrest", "Theft", "Vandalism", "Burglary", "Crime_Relative"]
 	header = header + ["Elementary_School_Count", "Elementary_School_Avg_Score", 
 	"Middle_School_Count", "Middle_School_Avg_Score", "High_School_Count", "High_School_Avg_Score", 
-	"Restaurants", "Groceries", "Nightlife", "Cafes", "Shopping", "Entertainment", "Beauty", "Fitness"]
+	"Restaurants", "Groceries", "Nightlife", "Cafes", "Shopping", "Entertainment", "Fitness"]
 
 	header = header + ["Latitude", "Longitude",
 	"EPA_Region", "Population", "Input_area(sq. miles)",
@@ -58,8 +58,8 @@ def save_rental(d, url, name):
 	"URL", "Short_form_ID","Days_crawled"]
 
 	value = [d.get("address", "NA"), d.get("city", "NA"), d.get("state", "NA"), 
-	d.get("zip code", "NA"), d.get("rent_per_month", "NA"), d.get("Year", "NA"), 
-	d.get("Days_On_Trulia", "NA"), d.get("Type", "NA"), d.get("Sqft", "NA"), d.get("Phone_Number", "NA")]
+	d.get("zip code", "NA"), d.get("CBSA", "NA"), d.get("rent_per_month", "NA"), d.get("Year", "NA"), 
+	d.get("Days_On_Trulia", "NA"), d.get("Downtown", "NA"), d.get("Error_sending", "0"), d.get("Type", "NA"), d.get("Sqft", "NA"), d.get("Phone_Number", "NA")]
 
 	value = value + [d.get("Bedroom_min", "NA"), d.get("Bedroom_max", "NA"), d.get("Bathroom_min", "NA"), d.get("Bathroom_max", "NA")]
 	value = value + [d.get("Assault", "NA"), d.get("Arrest", "NA"), d.get("Theft", "NA"), 
@@ -68,7 +68,7 @@ def save_rental(d, url, name):
 	d.get("Middle_School_Count", "NA"), d.get("Middle_School_Avg_Score", "NA"),
 	d.get("High_School_Count", "NA"), d.get("High_School_Avg_Score", "NA"), 
 	d.get("Restaurants", "NA"), d.get("Groceries", "NA"), d.get("Nightlife", "NA"), d.get("Cafes", "NA"), 
-        d.get("Shopping", "NA"), d.get("Entertainment", "NA"), d.get("Beauty", "NA"), d.get("Fitness", "NA")]
+        d.get("Shopping", "NA"), d.get("Entertainment", "NA"), d.get("Fitness", "NA")]
 
 	value = value + [d.get("lat", "NA"), d.get("lon", "NA"),
 	d.get("epa_region", "NA"), d.get("population", "NA"), d.get("input area(sq. miles)", "NA"),
