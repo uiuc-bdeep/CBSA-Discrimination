@@ -9,7 +9,6 @@ import json
 import pandas as pd
 import numpy as np
 sys.path.insert(1, '/home/ubuntu/CBSA-Discrimination/crawl_listings/extract/')
-import extract_sold_rental_data as extract
 from sys import exit
 from time import sleep
 from re import sub
@@ -111,15 +110,18 @@ def get_property_detail(driver, off_market):
 
 def get_phone_number(driver, off_market):
 	if off_market:
-		print("\tNo Phone Number Available")
+		print("\tOff market - No Phone Number Available")
 		return "NA"
 	try:
 		phone_number = driver.find_element_by_xpath('//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[4]/div[2]/div/div/div[1]/a/div/div[2]').text
-		print("\tPhone Number: {}".format(phone_number))
-		return phone_number
 	except:
-		print("\tNo Phone Number Available")
-		return "NA"
+		try:
+			phone_number = drive.find_element_by_xpath('//*[@id="main-content"]/div[2]/div[2]/div[1]/div[2]/div/div/div/div[2]/div/div/div/div[2]').text
+		except:
+			print("\tNo Phone Number Found")
+			return "NA"
+	print("\tPhone Number: {}".format(phone_number))
+	return phone_number
 
 def phone_to_int(number):
 	return int(number[1:4] + number[6:9] + number[10:])

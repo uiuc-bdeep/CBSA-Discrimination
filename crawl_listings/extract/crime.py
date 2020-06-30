@@ -10,8 +10,7 @@ import random
 import json
 import pandas as pd
 import numpy as np
-sys.path.insert(1, '/home/ubuntu/Housing-Discrimination/scripts/listings_crawler/')
-import extract_sold_rental_data as extract
+sys.path.insert(1, '/home/ubuntu/CBSA-Discrimination/crawl_listings/extract/')
 from sys import exit
 from time import sleep
 from re import sub
@@ -41,7 +40,10 @@ def extract_crime(driver, d, off_market):
 	#d = {"theft": "NA", "burglary": "NA", "assault": "NA", "arrest": "NA", "vandalism": "NA", "crime_other": "NA"}
 	xpath_list = []
 	if not off_market:  # Listing is on the market
-		xpath_list = [('//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[3]/div[2]/div[1]/div/div[3]/div/div[2]', '//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[3]/div[2]/div[1]/div/div[3]/div'), ('//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[3]/div[2]/div[1]/div/div[4]/div/div[2]', '//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[3]/div[2]/div[1]/div/div[4]/div')]
+		xpath_list = [
+	('//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[3]/div[2]/div[1]/div/div[3]/div/div[2]', '//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[3]/div[2]/div[1]/div/div[3]/div'), 
+	('//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[3]/div[2]/div[1]/div/div[4]/div/div[2]', '//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[3]/div[2]/div[1]/div/div[4]/div'),
+	('//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div/div[4]/div/div[2]', '//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div/div[4]/div')]
 	else:  		    # Listing is off the market
 		xpath_list = [('//*[@id="main-content"]/div[2]/div[2]/div[4]/div[2]/div[1]/div/div[4]/div/div[2]', '//*[@id="main-content"]/div[2]/div[2]/div[4]/div[2]/div[1]/div/div[4]/div'), ('//*[@id="main-content"]/div[2]/div[2]/div[4]/div[2]/div/div/div[3]/div/div[2]', '//*[@id="main-content"]/div[2]/div[2]/div[4]/div[2]/div/div/div[3]/div')]
 	result = find_button(driver, xpath_list, d)

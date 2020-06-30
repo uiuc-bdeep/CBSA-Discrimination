@@ -10,8 +10,7 @@ import random
 import json
 import pandas as pd
 import numpy as np
-sys.path.insert(1, '/home/ubuntu/Housing-Discrimination/scripts/listings_crawler/extract/sold_rental')
-import extract_sold_rental_data as extract
+sys.path.insert(1, '/home/ubuntu/CBSA-Discrimination/crawl_listings/extract/')
 from sys import exit
 from time import sleep
 from re import sub
@@ -41,7 +40,7 @@ def extract_shop(driver, d, off_market):
 	# Must click on another link and then click on Shop & Eat
 	xpath_list = []
 	if not off_market:	# Listing is on the market
-		xpath_list = ['//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[3]/div[2]/div[1]/div/div[1]/div']
+		xpath_list = ['//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[3]/div[2]/div[1]/div/div[1]/div', '//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div/div[1]/div']
 	else:			# Listing is off the market
 		xpath_list = ['//*[@id="main-content"]/div[2]/div[2]/div[4]/div[2]/div[1]/div/div[1]/div']
 	result = find_button(driver, xpath_list)

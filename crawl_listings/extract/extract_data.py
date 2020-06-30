@@ -34,8 +34,8 @@ from selenium.common.exceptions import WebDriverException
 from selenium.common.exceptions import NoAlertPresentException
 from selenium.webdriver.common.proxy import Proxy
 
-from sold_rental.extract_sold_rental_data import *
-from rental.extract_rental_data import *
+#from sold_rental.extract_sold_rental_data import *
+#from rental.extract_rental_data import *
 import crime, school, shop, basic_info as basic
 
 def check_off_market(driver):

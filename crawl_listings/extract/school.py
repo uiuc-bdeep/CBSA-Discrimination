@@ -10,8 +10,8 @@ import random
 import json
 import pandas as pd
 import numpy as np
-sys.path.insert(1, '/home/ubuntu/Housing-Discrimination/scripts/listings_crawler/extract/sold_rental')
-import extract_sold_rental_data as extract
+sys.path.insert(1, '/home/ubuntu/CBSA-Discrimination/crawl_listings/extract/')
+#import extract_sold_rental_data as extract
 from sys import exit
 from time import sleep
 from re import sub
@@ -39,7 +39,7 @@ from selenium.webdriver.common.proxy import Proxy
 def extract_school(driver, d, off_market):
 	xpath_list = []
 	if not off_market:
-		xpath_list = [('//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[3]/div[2]/div[1]/div/div[3]/div/div[2]', '//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[3]/div[2]/div[1]/div/div[3]/div'), ('//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[3]/div[2]/div[1]/div/div[2]/div/div[2]', '//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[3]/div[2]/div[1]/div/div[2]/div')]
+		xpath_list = [('//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[3]/div[2]/div[1]/div/div[3]/div/div[2]', '//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[3]/div[2]/div[1]/div/div[3]/div'), ('//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[3]/div[2]/div[1]/div/div[2]/div/div[2]', '//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[3]/div[2]/div[1]/div/div[2]/div'), ('//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div/div[3]/div/div[2]', '//*[@id="main-content"]/div[2]/div[2]/div[1]/div[1]/div[4]/div[2]/div[1]/div/div[3]/div')]
 	else:
 		xpath_list = [('//*[@id="main-content"]/div[2]/div[2]/div[4]/div[2]/div[1]/div/div[3]/div/div[2]', '//*[@id="main-content"]/div[2]/div[2]/div[4]/div[2]/div[1]/div/div[3]/div'),('//*[@id="main-content"]/div[2]/div[2]/div[4]/div[2]/div/div/div[2]/div/div[2]', '//*[@id="main-content"]/div[2]/div[2]/div[4]/div[2]/div/div/div[2]/div')] 
 	result = find_button(driver, xpath_list)
@@ -83,7 +83,7 @@ def count_schools(driver, xpath):
 		avg = float(total) / count
         	return count, round(avg, 3)
 	except:
-		return -1, -1
+		return "NA", "NA"
 
 def find_button(driver, xpath_list):
 	for pair in xpath_list:
@@ -98,7 +98,7 @@ def find_button(driver, xpath_list):
 	return -1
 
 def set_NA(d):
-	d["Elementary_School_Count"] = -"NA"
+	d["Elementary_School_Count"] = "NA"
 	d["Elementary_School_Avg_Score"] = "NA"
 	d["Middle_School_Count"] = "NA"
 	d["Middle_School_Avg_Score"] = "NA"
