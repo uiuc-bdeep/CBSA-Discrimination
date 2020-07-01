@@ -37,7 +37,6 @@ from selenium.webdriver.common.proxy import Proxy
 
 
 def extract_crime(driver, d, off_market):
-	#d = {"theft": "NA", "burglary": "NA", "assault": "NA", "arrest": "NA", "vandalism": "NA", "crime_other": "NA"}
 	xpath_list = []
 	if not off_market:  # Listing is on the market
 		xpath_list = [
@@ -53,7 +52,7 @@ def extract_crime(driver, d, off_market):
 		print("\tCould NOT find Crime button")
 		set_NA(d)
 		sleep(1)
-		driver.save_screenshot("missing/missing-crime.png")
+		driver.save_screenshot("missing-crime.png")
 		return -1
 	sleep(3)
 	d["Theft"] =     count_crime(driver, "Theft",     '//*[@id="modal-container"]/div/div[2]/div[2]/div/div[4]/div/div[1]/div/div[1]/div/button')
@@ -73,7 +72,7 @@ def close_page(driver):
 	sleep(1)	
 		
 def find_button(driver, xpath_list, d):
-	for pair in xpath_list:
+	for idx, pair in enumerate(xpath_list):
 		text, button = pair
 		try:
 			crime_text = driver.find_element_by_xpath(text).text
@@ -84,7 +83,7 @@ def find_button(driver, xpath_list, d):
 				driver.find_element_by_xpath(button).click()
 				return 0
 		except:
-			break
+			continue
 	return -1
 
 def count_crime(driver, crime, xpath):

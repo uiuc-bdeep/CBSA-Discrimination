@@ -49,7 +49,7 @@ def extract_school(driver, d, off_market):
 		print("\tCould NOT find school page")
 		set_NA(d)
 		sleep(1)
-		driver.save_screenshot("missing/mising-school.png")
+		driver.save_screenshot("missing-school.png")
 		return -1
 	sleep(3)
 	d["Elementary_School_Count"], d["Elementary_School_Avg_Score"] = count_schools(driver, '//*[@id="modal-container"]/div/div[2]/div[2]/div/div[3]/div/div/div/div[1]/div/button')
@@ -94,7 +94,7 @@ def find_button(driver, xpath_list):
 				driver.find_element_by_xpath(button).click()
 				return 0
 		except:
-			break
+			continue
 	return -1
 
 def set_NA(d):

@@ -70,7 +70,7 @@ def restart(crawler_log, start):
 
     arg = sys.argv
     if os.path.isfile(crawler_log):
-            arg[-2] = str(int(lines[-1].rstrip())+1)
+            arg[3] = str(int(lines[-1].rstrip())+1)
 
     print(arg)
     os.execv(sys.executable, ['python'] + arg)

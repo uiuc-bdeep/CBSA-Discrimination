@@ -50,7 +50,7 @@ def extract_shop(driver, d, off_market):
 		print("\tCould NOT find Shop page")
 		set_NA(d)
 		sleep(2)
-		driver.save_screenshot("missing/missing-shop.png")
+		driver.save_screenshot("missing-shop.png")
 		return -1
 	sleep(3)
         try:
@@ -86,9 +86,9 @@ def find_button(driver, xpath_list):
 		try:
 			driver.find_element_by_xpath(xpath).click()
 			clicked = True
-			continue	
+			break         #continue	
 		except:
-			break
+			continue      #break
 	if not clicked:
 		print("\tCan't click ANY buttons")
 		return -1
